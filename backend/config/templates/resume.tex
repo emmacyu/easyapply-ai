@@ -1,0 +1,225 @@
+% !TEX program = xelatex
+
+\documentclass[10pt]{resume}
+\usepackage{geometry}
+\geometry{letterpaper,left=1.2cm,right=1.2cm,top=0.8cm,bottom=1cm}
+\definecolor{red}{RGB}{159,26,59} % Queen's Universtiy Logo Red rgba(159,26,59)
+\hypersetup{hidelinks}
+
+\begin{document}
+\pagenumbering{gobble} % suppress displaying page number
+
+\vspace{-2em}
+%\begin{minipage}[b]{0.95\linewidth}
+{\color{red}\name{Emma (Chunli) Yu}}
+\vspace{-0.5em}
+
+\basicInfo{
+  %\email{Chunli.Yu@queensu.ca} \textperiodcentered\
+  \email{emmayu.cs@gmail.com} \textperiodcentered\
+  \phone{437-973-4933} \textperiodcentered\ 
+  % \phone{(+1) 437-500-8393} \textperiodcentered\ 
+  \linkedin[linkedin.com/in/emmacyu]{https://www.linkedin.com/in/emmacyu}\textperiodcentered\
+  %\location{Toronto, ON (\textit{open to relocate)}}
+  \location{Toronto, ON \color{darkgray}\small(\textit{open to relocate})}
+  }
+
+%\vskip 0.1in
+\vspace{-1.2em}
+{\color{red}\section{\faFlash \ Highlights}}
+\begin{itemize}
+\item 6+ years building data pipelines, backends, and end-to-end agentic AI applications. % with a strong foundation in data engineering.
+\item Collaborated with product, science, and infra teams to translate requirements into shipped AI features. %\item Demonstrated leadership in cross-functional collaboration with product, research, and infrastructure teams.% to deliver high-impact solutions.
+%\item Partnered with cross-functional collaboration with product, research, and infrastructure teams on high-impact solutions. %to deliver high-impact solutions.
+\item \textbf{AI \& ML}: LangChain/LangGraph, MCP, RAG, vector search, agentic workflows \& tool calling, fine-tuning, evaluation/benchmarking, Scikit-learn, PyTorch, A/B testing. %{\scriptsize \textcolor{white}{transformers, NLP, GenAI, computer vision, SageMaker, Unix/Linux, generative models, image processing, Terraform} }
+\item \textbf{Backend \& Data}: FastAPI/Asyncio, Postgres, MySQL, MongoDB, Redis, REST/GraphQL APIs, ETL pipelines, Hadoop.
+\item \textbf{Infrastructure \& DevOps}: Telemetry \& Tracing, AWS, Docker, Kubernetes, Git, CI/CD (GitHub Actions), Linux.
+\end{itemize} 
+
+\vspace{-1em}
+\section{\color{red} \faUsers\ Experience %{\scriptsize \textcolor{white}{GenAI, computer vision, SageMaker, Unix/Linux, Git, JAX, generative models, image processing} }
+}
+
+\vspace{-0.6em}
+\datedsubsection{AI Data Engineer, \textbf{Skynet Software Inc.}, Kitchener, Canada}{\footnotesize 2024.11 -- 2025.04}
+\begin{itemize}
+%\item Developed and deployed Python AI solutions using Llama models and MongoDB on AWS to automate insurance application classification, improving accuracy from 80\% to 97\%.
+\item Architected a multi-agent orchestration system to automate complex insurance document processing, implementing a Supervisor-Worker pattern with tool-calling workflows that dynamically route variable-length PDF pages to specialized inference experts --- cutting monthly processing costs by \textasciitilde57\% versus the prior OCR-based pipeline.
+\item Deployed fine-tuned Llama3 multi-modal (13B) on AWS as the core reasoning engine for structured entity extraction from unstructured visual data, improving accuracy from 80\% to 97\% and cutting per-page inference latency from 6s to 4s.
+\item Built guardrails for agentic workflows — a self-reflection layer with automated validation, multi-agent feedback loops, and structured error handling — ensuring data integrity before commits to MongoDB. %Developed a self-reflection layer for automated data validation and post-processing, coordinating multi-agent feedback loops to ensure high data integrity before committing to MongoDB.
+\item Optimized Python and Shell-based automation workflows for weekly system reports by refactoring execution logic and eliminating redundant processing, reducing runtime from 1 hour to 15 minutes.
+\end{itemize}
+
+\vspace{-0.9em}
+\datedsubsection{Machine Learning Researcher, \textbf{Queen's University}, Kingston, Canada}{\footnotesize 2021.01 -- 2024.01}
+\begin{itemize} 
+% \item Data migration from MySQL to Hadoop, Build data pipeline for user profiling analysis
+%\item Developed a multi-head Convolutional Neural Network (CNN) with Long Short-Term Memory (LSTM) units in Python to automate the classification of sleep stages from EEG data, achieving an accuracy above 89\%. 
+%\item Developed Machine Learning models using Random Forest classifier in Python to recommend reusable code fragments. This involved collecting code snippets from GitHub, extracting code features, cleansing the data, tagging reusable code based on reuse frequency, and fine-tuning the model, achieving AUC of 0.73.
+%Developed and implemented ML automation pipelines in Python to classify code fragments, identifying and excluding defective code to mitigate risks and prevent unreliable code from compromising software system integrity. This involved collecting code snippets from GitHub, extracting code features, cleansing the data, fine-tuning various models, and validating models, achieving AUC of 0.73. %and design various test cases, triaging automation results. %resulting in a 5.99\% increase in optimized program generation through detailed performance testing and model refinement
+%Designed and implemented reusable, parameterized, and fully automated ML pipelines in Python for large-scale source code analysis across 60 large open-source projects, enabling repeatable data ingestion, feature extraction, model training, and evaluation.
+% \item Developed reusable, automated ML pipelines in Python to process code from 60 open-source projects, detecting defective code and preventing downstream failures (median AUC 0.73).
+\item \textbf{Published} \textit{“An Empirical Study on the Characteristics of Reusable Code Clones,”} \textbf{TOSEM} 2024, investigating code reuse using ML classifiers, to help developers prioritize high-quality code fragments.
+\item Built a reusable ML workflow in Python to classify code fragments,  including code dataset extraction and cleansing (\textasciitilde 4TB from 60+ open-source projects), feature engineering and selection (correlation analysis, permutation-based importance), model training and evaluation, %(Random Forest, XGBoost, CatBoost, AdaBoost), 
+achieving median AUC of 0.73.
+
+%Fine-tuned the Large Language Model (LLM) - CodeLlama - on a dataset of 62,376 Python code pairs, leveraging few-shot prompting with varying example counts (0, 1, 2, 4, 8). The fine-tuned model achieved a 5.99\% increase in the number of optimized programs.
+ %Automated code optimization by fine-tuneding the Large Language Model (LLM) - CodeLlama - on a dataset of 62,376 Python code pairs. %, with 5 test cases executed for each Python code. 
+ %After leveraging few-shot prompting with varying example counts (0, 1, 2, 4, 8), the fine-tuned model achieved a 5.99\% increase in optimized, defect-free programs.
+
+\item Designed and implemented end-to-end pipelines to prepare 62k+ Python code pairs for LLM fine-tuning, with automated unit-test validation, built-in retry logic, and structured logging for code optimization.
+
+% Fine-tuned large language models (CodeLlama) on 62,376 Python code pairs to automate code optimization, combining supervised fine-tuning with few-shot prompting to improve the proportion of optimized, defect-free programs by 5.99\%.
+
+\end{itemize}
+
+\vspace{-0.9em}
+%\vskip -1in
+% \section{\color{red} \faUsers\ Experience}
+\datedsubsection{Data Engineer, \textbf{Tuhu Automotive Technology Inc.}, Wuhan, China}{\footnotesize 2019.11 -- 2020.12}
+\begin{itemize}
+% \item Data migration from MySQL to Hadoop, Build data pipeline for user profiling analysis
+% \item Design data models and migrate data warehouse from MySQL to Hadoop, following the Star Schema. 
+%Design, build and automate new data extraction, transformation and loading processes (ETL) in production.
+
+\item Designed and built a full-stack data warehouse in Hadoop from scratch; implemented production ETL pipelines and analytical workflows to deliver reliable, scalable data for downstream ML and analytics.
+
+\item Resolved operational issues and optimized pipelines, data warehouses, marts for improved efficiency and scalability.
+
+% \item Build data pipeline 
+% \item Ingestion of data into Hadoop using Sqoop and apply data transformations and using Pig and HIVE.
+% \item Create classification and predictive models for user engagement analysis, contributing to a 11\% YOY growth in revenue despite the impact of COVID
+\item Managed and enhanced data dictionaries to ensure data consistency and traceability. 
+
+\item Developed visualizations in Tableau and Python to convey user engagement insights, enhancing data-driven decision-making and transparency for stakeholders.
+\item Mentored team members through actionable feedback and knowledge sharing to improve team capability and collaboration.
+\end{itemize}
+
+\vspace{-0.9em}
+\datedsubsection{Data Engineer, \textbf{Aetna Inc.}, Hartford, CT, USA}{\footnotesize 2017.03 -- 2019.01}
+% \role{Data Scientist}{}
+% Data Science Team\\
+% \hspace*{1em} {\textit{\textbf{Data Scientist (Data Engineer 2017.3 -- 2018.1)}}} \hfill {}
+% {\textit{\textbf{Data Engineer}}} \hfill {2017.3 -- 2018.1}
+\begin{itemize}
+%\item Perform Data Cleaning, features scaling, features engineering using Pandas and Numpy packages in python.
+%\item Executed complex HiveQL queries for required data extraction from Hive tables and wrote Hive UDF.
+
+%\item Healthcare datawei
+% \item Snowflake schema
+%\item Involved in the scaling of the current SAS platform and data movement to Hadoop environment.
+%\item Developed pipelines to organize and standardize large volume of data in multiple formats to help generate insights and address reporting needs.
+% \item Automate and optimize data pipeline including data extraction, cleansing and	normalization 
+\item Developed ETL pipelines to ingest, cleanse, and standardize large healthcare and insurance datasets; supported post-acquisition integration across multiple systems.  
+\item Collected data via REST APIs with Python and loaded curated datasets into Hadoop for scalable analytics.
+
+%\item Conducted statistical analysis on Healthcare data using python and various tools.
+% \item Build predictive models using structured \& unstructured data to evaluate scenarios and potential outcomes
+%\item Ingestion of data into Hadoop using Sqoop and apply data transformations and using Pig and HIVE.
+% \item Build data	visualization	tools	to	effectively	communicate	analytical	results	and	support	business	decisions
+\end{itemize}
+
+\vspace{-0.9em}
+\datedsubsection{Software/Data Engineer, \textbf{Huawei R\&D Center}, Santa Clara, CA, USA}{\footnotesize 2015.05 -- 2017.03}
+\vspace{-0.5em}
+\textit{Full-time employee: 2016.5 -- 2017.3; Summer Intern: 2015.5 -- 2015.8}
+%\hspace*{1em}{\textit{\textbf{Data Engineer (Summer Intern 2015.5 -- 2015.8)}}}  \hfill {}
+% {\textit{\textbf{Summer Intern}}}  \hfill {2015.5 -- 2015.8}
+\vspace{-0.2em}
+\begin{itemize}
+\item Enhanced distributed database systems by implementing the RAFT consensus protocol in C within Postgres-XC, improving system
+reliability and fault tolerance.
+% \item Collaborated with engineers and researchers on large-scale distributed system design, contributing to improvements in
+%\item Built a more fault tolerant distributed database system by applying RAFT %(similar to Paxos) 
+%protocol to Postgres-XC on Linux. %Suse 11 
+%  \item Design,	build,	maintain and	optimize	data	pipelines	providing	easy	access	for	researchers
+%   \item Automate the	installation and configuration	of	Postgres	on multiple machines
+%  \item Explore acceleration schemes for canonical machine learning on Huawei distributed computing platform
+%  \item Honed critical thinking and communication skills through discussing research results in weekly %research 
+ % seminars.
+% Present and discuss research results in weekly research seminars
+%  \item Studied and revamped data management strategies to include 
+\end{itemize}
+
+% \datedsubsection{Graduate	Teaching	Assistant, \textbf{Syracuse	University},Syracuse, NY USA}{2014.8	– 2016.5}
+% %\hspace*{1em} {\textit{\textbf{Graduate	Teaching	Assistant}}}  \hfill {}
+% % {\textit{\textbf{  Summer Intern}}},  \hfill {2015.5 -2015.8}
+% \begin{itemize}
+%   \item Instruct C and Java programming lab; Grade undergrad homework and course projects and exams
+%   \item Held office hours to help students in need
+% \end{itemize}
+
+% \datedsubsection{Software Engineer, \textbf{Accenture	Co.	Ltd.}, Shanghai, China}{2013.06 -- 2014.08}
+% % (reality: 2013.7 - 2014.5)
+% 
+% % \hspace*{1em}{\textit{\textbf{Software	Engineer}}}  \hfill{}
+% % {\textit{\textbf{  Summer Intern}}},  \hfill {2015.5 -2015.8}
+% \begin{itemize}
+%   \item Contributed to development	of	an	e-commence	system,	focusing on the logistics part.
+% \end{itemize}
+
+
+
+%%======== Publications ==========
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+% \vspace{-0.5em}
+% \section{\color{red} \faBook\ Publication}
+% 1.    \underline{C. Yu}, “Using Latent Semantic Indexing for an Online Research Interest Matching System,” proceedings of ICAIEES, 2013. DOI: 10.2991/icaiees-13.2013.30 
+
+% 2.   S. Jin, Y. Cui, and \underline{C. Yu}, “A New Parallelization Method for K-means,” arXiv:1608.06347[cs], Aug. 2016
+
+
+%%======== Skills ==========
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+% \vspace{-0.5em}
+% %\vskip -1in
+% \section{\color{red} \faCogs\ Skills}
+% \begin{itemize}[parsep=0.5ex]
+%   \item \textbf{Programming Languages}: Java, Python (i.e. Pandas, Numpy, scikit-learn, Seaborn), SQL, Shell scripting %, JavaScript, HTML/CSS
+%   \item \textbf{Big data \& Machine Learning}: Hadoop, MapReduce, tensorflow, pytorch, Airflow, Kafka
+%   \item \textbf{Database}: MySQL, Postgres, Oracle, Presto, Netezza
+%   \item \textbf{Engineering practice}: AWS, Bash, Git, Jira, Confluence, Travis-CI, Sqoop
+% %  \item \textbf{Web}: HTML,CSS,Javascript, Django
+%   %\item Languages: English (fluent),Chinease (native), Japanese (conversational)
+% % 
+% \end{itemize}
+
+
+
+%%======== Awards ==========
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+% \vspace{-0.5em}
+% \section{{\color{red}\faHeartO\ Awards}}
+% \begin{itemize}
+%   \item \textbf{National Scholarship} (highly competitive government scholarship awarded to only 2 students from School of Computer Science and Technology) \hfill {2012.10}
+%   \item \textbf{National Scholarship for Encouragement} for 2 consecutive years  \hfill 2010 – 2011
+% \end{itemize}
+% \end{document}
+ 
+
+%%======== Volunteer ==========
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+% \vspace{-0.5em}
+% \section{{\color{red}\faHeartO\ Volunteer Experience}}
+% \begin{itemize}
+%   \item Social Volunteer \& Service Volunteer, Special Olympics New York, Syracuse, NY \hfill {2015.2}
+%   \item Student Volunteer, The Sunshine Yihong Orphanage, Dalian, China   \hfill 2012.3 – 2012.4
+% \end{itemize}
+
+\vspace{-1em}
+\section{\color{red} \faGraduationCap\ Education}
+\vspace{-0.5em}
+\datedsubsection{\textbf{Queen's University}, Kingston, Canada}{\footnotesize 2021 -- 2024}
+\vspace{-0.5em}
+\hspace{1em}\textit{Master's in Computer Science (\textbf{Machine Learning \& AI})  \hfill GPA 3.8}
+\vspace{-0.8em}
+\datedsubsection{\textbf{Syracuse University}, Syracuse, USA}{\footnotesize 2014 -- 2016}
+\vspace{-0.5em}
+\hspace{1em}\textit{Master's in Computer Science (\textbf{Software Development})  \hfill GPA 3.5} \\
+\vspace{-2em}
+%\datedsubsection{\textbf{Liaoning Normal University}, Dalian, China}{2009 -- 2013} \vspace{-0.5em}
+%\hspace{1em}\textit{B.S. in Computer Science  (\textbf{Software Development}) %\textbf{Minor} in Japanese Language  left
+%\hfill GPA 3.7}   
+
+\end{document}
+ 

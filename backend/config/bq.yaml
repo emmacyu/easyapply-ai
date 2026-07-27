@@ -1,0 +1,11 @@
+This role is about building agents on top of an observability platform. In 2-3 sentences, what's one agent failure mode you'd worry about when the agent is reading real production telemetry?
+Confidently wrong root causes. Telemetry is full of things that correlate but aren't related, and an LLM will happily turn whatever ended up in its context into a neat causal story. At 2 AM that's actually worse than no answer, because the on-call trusts it and burns 40 minutes going down the wrong path. So I'd make the agent show its work — the actual queries and log lines behind each claim — and test it against old incidents where we already know the real root cause.
+
+
+Tell us about the AI system you have built that had the clearest business impact (revenue, conversion, response time, retention, cost). What was the metric before and after, what did you build, and how did you prove the impact came from your system and not something else?:
+At Skynet Software Inc., I architected a multi-agent orchestration system for insurance document processing that reduced monthly costs by ~57% compared to the previous OCR-based pipeline. I deployed a fine-tuned Llama3 model that improved extraction accuracy from 80% to 97% and reduced per-page latency from 6s to 4s. The impact was proven by directly replacing the legacy OCR workflow and implementing a self-reflection layer with automated validation loops to ensure data integrity.
+
+linkedin connect invitaiton:
+Hi xxx, came across your post about xxx, looks like a great match for my background. Would love to connect and chat.
+Thanks,
+Emma

@@ -1,0 +1,27 @@
+services:
+  jobpilot:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    image: jobpilot:latest
+    container_name: jobpilot
+    ports:
+      - "8000:8000"
+      - "8765:8765"   # one-time Gmail OAuth loopback (python main.py gmail-auth)
+      - "8766:8766"   # one-time Google Slides OAuth loopback (python main.py gslides-auth)
+    # Pass LLM provider + API keys from the repo-root .env (copy from backend/.env.example)
+    env_file:
+      - .env
+    volumes:
+      # Persist the SQLite DB and generated resumes/cover letters across restarts
+      - jobpilot-data:/app/backend/data
+      # Gmail OAuth client credentials + token (bind mount so they persist & are editable)
+      - ./backend/config/secrets:/app/backend/config/secrets
+      # Live profile.yaml so the Profile UI's saves land on disk & take effect without rebuild
+      - ./backend/config/profile.yaml:/app/backend/config/profile.yaml
+      # Live bq.yaml (user's hand-written Q&A) — read-only lookup, edits take effect without rebuild
+      - ./backend/config/bq.yaml:/app/backend/config/bq.yaml
+    restart: unless-stopped
+
+volumes:
+  jobpilot-data:

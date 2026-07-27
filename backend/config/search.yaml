@@ -1,0 +1,15 @@
+sites:
+  - indeed
+  - linkedin
+  - glassdoor
+  - google
+searches:
+  - term: "AI developer"
+    location: "Ontario, Canada"
+  - term: "Data engineer"
+    location: "Ontario, Canada"
+results_per_site: 30
+hours_old: 72
+country_indeed: "Canada"
+schedule_cron: "0 8 * * *"
+score_threshold: 70

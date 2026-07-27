@@ -1,0 +1,55 @@
+\documentclass[12pt,a4paper,roman]{moderncv}
+\moderncvstyle{classic}
+\moderncvcolor{green}
+
+\usepackage{ragged2e}
+\usepackage[utf8]{inputenc}
+\usepackage[scale=0.87]{geometry}
+\usepackage{xcolor}
+
+%\def \position {Machine Learning Engineer}
+%\def \positionlong {Machine Learning (ML) Engineer}
+\def \position {AI Developer}
+\def \company {STAN AI}
+
+\definecolor{red}{RGB}{159,26,59} % Queen's University Logo Red
+
+% personal data
+\name{Emma}{Yu}
+\phone[mobile]{437-973-4933}
+\email{emmayu.cs@gmail.com}
+
+\begin{document}
+\recipient{RE:}{\position{} @ \company \\ } %Job id: 7083006002}  
+\date{\today}
+\opening{Dear Hiring Committee, }
+\closing{Thanks in advance!}
+\enclosure[Attachment]{CV}
+\makelettertitle
+
+\begin{justify}
+
+I am excited to apply for the AI Developer position at STAN AI. With hands-on experience building production RAG systems, vector search pipelines, and multi-step agent workflows, I am particularly motivated by the opportunity to design and ship AI features that directly impact thousands of property management operations.
+
+During my Master's program at Queen's University, I conducted applied machine learning research on large-scale code analysis, resulting in the publication “An Empirical Study on the Characteristics of Reusable Code Clones” (TOSEM 2024). This work involved building multi-terabyte data pipelines, designing feature engineering workflows, and developing and evaluating models at scale. I also fine-tuned CodeLLaMA-7B-Instruct using LoRA on over 62,000 structured code pairs, achieving a 20\% improvement in performance while implementing automated evaluation pipelines and prompt engineering strategies.
+
+Most recently, as a Data Engineer at Skynet Software Inc., I designed and deployed end-to-end RAG systems for document intelligence. I built retrieval-augmented generation pipelines from scratch, owning chunking strategies, retrieval optimization, and reranking approaches. I implemented and managed vector database infrastructure using Pinecone, integrating embeddings with core MongoDB data layers to create seamless data flows.
+
+I orchestrated multi-step LLM workflows using LangChain, including complex tool use patterns, memory management, and guardrail handling. I integrated LLM with careful attention to prompt design, context windows, streaming, and function calling to ensure robust production behavior. I also built evaluation pipelines to measure LLM output quality, iterating on retrieval strategies and prompt approaches based on real production data.
+
+These efforts improved system accuracy from 80\% to 97\% and reduced latency by 30\%, demonstrating deep understanding of the quality-latency-cost tradeoffs that matter in production systems. I bring strong hands-on expertise in Python, with experience building clean, well-tested, production-grade code. I'm comfortable designing and debugging complex AI systems end-to-end.
+
+What excites me about STAN AI is the focus on shipping real AI features that serve thousands of communities. I thrive working directly with product and engineering to scope feasibility, design architecture, and bring a point of view on embedding models, chunking strategies, and the real tradeoffs that matter in production. I'm motivated by the challenge of handling edge cases like hallucination, context limits, and reasoning failures—problems that only surface at scale.
+
+I'm particularly drawn to your tech stack and culture of using AI-assisted development with Claude Code to ship faster. I enjoy approaching problems with an engineering mindset that balances speed, quality, and reliability, and I'm excited to help establish patterns and best practices as your AI feature set grows.
+
+
+Thank you for considering my application. Look forward to hearing back from you! 
+
+\vspace{0.5cm}
+\end{justify}
+
+Sincerely,   \\
+Emma Yu
+
+\end{document}

@@ -1,0 +1,59 @@
+\documentclass[11pt,a4paper]{article}
+\usepackage[margin=0.75in]{geometry}
+\usepackage{enumitem}
+\usepackage{hyperref}
+\usepackage[T1]{fontenc}
+\usepackage{lmodern}
+\pagestyle{empty}
+\setlist[itemize]{leftmargin=*, nosep, topsep=2pt}
+
+\begin{document}
+
+\begin{center}
+{\LARGE \textbf{\VAR{name}}}\\[4pt]
+\VAR{email} \textbar{} \VAR{phone} \textbar{} \VAR{location}\\[2pt]
+\VAR{linkedin} \textbar{} \VAR{github}
+\end{center}
+
+\vspace{6pt}
+\section*{Summary}
+\VAR{summary}
+
+\section*{Experience}
+\BLOCK{ for exp in experience }
+\textbf{\VAR{exp.title}} \hfill \VAR{exp.start} -- \VAR{exp.end}\\
+\textit{\VAR{exp.company}} \hfill \VAR{exp.location}\\
+\begin{itemize}
+\BLOCK{ for bullet in exp.bullets }
+  \item \VAR{bullet}
+\BLOCK{ endfor }
+\end{itemize}
+\BLOCK{ if exp.tech }
+\textit{Tech: \VAR{exp.tech | join(', ')}}
+\BLOCK{ endif }
+\vspace{4pt}
+\BLOCK{ endfor }
+
+\BLOCK{ if projects }
+\section*{Projects}
+\BLOCK{ for proj in projects }
+\textbf{\VAR{proj.name}}\\
+\begin{itemize}
+\BLOCK{ for bullet in proj.bullets }
+  \item \VAR{bullet}
+\BLOCK{ endfor }
+\end{itemize}
+\BLOCK{ endfor }
+\BLOCK{ endif }
+
+\section*{Education}
+\BLOCK{ for edu in education }
+\textbf{\VAR{edu.degree}}, \VAR{edu.school} \hfill \VAR{edu.year}\\
+\BLOCK{ endfor }
+
+\section*{Skills}
+\textbf{Languages:} \VAR{skills.languages | join(', ')}\\
+\textbf{Frameworks:} \VAR{skills.frameworks | join(', ')}\\
+\textbf{Tools:} \VAR{skills.tools | join(', ')}
+
+\end{document}

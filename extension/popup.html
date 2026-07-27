@@ -1,0 +1,75 @@
+<!doctype html>
+<html>
+  <head>
+    <meta charset="utf-8" />
+    <style>
+      :root { color-scheme: light dark; }
+      body {
+        width: 300px;
+        margin: 0;
+        font: 13px/1.4 -apple-system, system-ui, sans-serif;
+        padding: 14px;
+      }
+      h1 { font-size: 14px; margin: 0 0 2px; }
+      p.sub { margin: 0 0 12px; color: #888; font-size: 11px; }
+      button {
+        width: 100%;
+        padding: 9px;
+        margin-top: 8px;
+        border: 0;
+        border-radius: 8px;
+        background: #2563eb;
+        color: #fff;
+        font-weight: 600;
+        font-size: 13px;
+        cursor: pointer;
+      }
+      button:disabled { opacity: 0.6; cursor: default; }
+      button.secondary {
+        background: transparent;
+        color: #2563eb;
+        border: 1px solid currentColor;
+        font-weight: 500;
+      }
+      select {
+        width: 100%;
+        margin-top: 10px;
+        padding: 7px;
+        border: 1px solid #d1d5db;
+        border-radius: 8px;
+        font-size: 12px;
+        background: #fff;
+      }
+      .divider { margin: 12px 0 2px; font-size: 11px; color: #9ca3af; }
+      #status { margin-top: 10px; font-size: 12px; min-height: 16px; white-space: pre-wrap; }
+      .ok { color: #16a34a; }
+      .warn { color: #d97706; }
+      .err { color: #dc2626; }
+      .hint { margin-top: 12px; font-size: 11px; color: #888; }
+    </style>
+  </head>
+  <body>
+    <h1>JobPilot Autofill</h1>
+    <p class="sub">Fills this application from your profile.yaml</p>
+    <button id="save" class="secondary">★ Save this job to JobPilot</button>
+
+    <select id="applyJob" title="Which tailored resume to attach">
+      <option value="">Resume: none (fill fields only)</option>
+    </select>
+    <button id="apply">⚡ Apply — fill everything</button>
+
+    <p class="divider">Or step by step:</p>
+    <button id="fill" class="secondary">Fill this page</button>
+    <button id="ai" class="secondary">AI-answer blank questions</button>
+    <button id="oa" class="secondary">🖥️ OA screening → iPad</button>
+    <button id="finalround" class="secondary">🎤 FinalRoundAI (interview copilot)</button>
+    <button id="scan" class="secondary">Scan page (debug)</button>
+    <div id="status"></div>
+    <div class="hint">
+      Only fields present in your profile are filled. Review every field —
+      especially work eligibility &amp; voluntary self-ID — before submitting.
+      Scan logs the detected fields to the page's DevTools console.
+    </div>
+    <script src="popup.js"></script>
+  </body>
+</html>

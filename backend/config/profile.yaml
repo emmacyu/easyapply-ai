@@ -1,0 +1,181 @@
+personal:
+  first name: "Chunli"
+  last name: "Yu"
+  Preferred First Name: "Emma"
+  Preferred Last Name: "Yu"
+  Preferred Pronouns: "She/Her"
+  Middle Name: "None"
+  email: "emmayu.cs@gmail.com"
+  phone: "+1 (437) 973-4933"
+  phone type: "Mobile"
+  city: "Toronto"
+  location: "Toronto, ON, Canada"
+  Postal Code: "M2M1B9"
+  linkedin: "https://linkedin.com/in/emmacyu"
+  github: "https://github.com/emmacyu"
+  portfolio link: "https://github.com/emmacyu"
+  gender: "Female"
+  sexual orientation: "Heterosexual"
+  visible minority group: "East Asian (Chinese)"
+  an Indigenous/Aboriginal person who is First Nations, Inuit or Métis?: "No"
+  a person with a disability: "No"
+  had any Canadian military service?: "No"
+  work_authorization: "Open Work Permit"
+  needs_sponsorship: false
+  Preferred Language: "English"
+  ? Have you previously been employed by the Canadian federal government, a provincial government, a municipal government, or any federal, provincial or municipal crown corporation, agency, board, or commission in the past 5 years?
+  : "No"
+  ? Have you signed a non-compete or non-solicit agreement with your current employer that would preclude you from carrying out the expectations of this position?
+  : "No"
+  how did you hear about this job?: "Company Website"
+  Do you currently hold or have you held, within the last 5 years, a position as a government official?: "No"
+  Have you been referred or recommended for this position by a government official?: "No"
+  Are you related to or have a close personal relationship with a government official?: "No"
+  notice period: "Immediate"
+  would you like to be considered for other roles?: "Yes"
+  would you like to relocate?: "Yes"
+  are you able to work in the following locations?: "Canada"
+  what is your salary expectation?: "110000-150000"
+  Do you require visa sponsorship?: "No"
+  Are you legally authorized to work in Canada?: "Yes"
+  Are you willing to relocate?: "Yes"
+  needs_sponsorship: false
+  How did you find out about our company or this opportunity?: Linkedin
+  If recruiter or referral, please list contact: NA
+  Do you have a friend or relative that works for our group of companies?: "No"
+  Have you been convicted of a crime: "No"
+  Will you be requiring accommodations: "No"
+  May we send text messages that pertain to your job application?: "Yes"
+  Preferred time to be contacted in PST: "13:00"
+
+
+
+
+
+  __test_delete_me__: automation test
+summary: >
+  Software engineer with experience building backend systems and data pipelines. Passionate about clean architecture, developer productivity, and shipping reliable products.
+
+experience:
+- company: Skynet Software Inc.
+  title: AI Data Engineer
+  start: 2024-11
+  end: 2025-04
+  location: Kitchener, ON, Canada
+  bullets:
+  - Architected a multi-agent orchestration system to automate complex insurance document processing, implementing a Supervisor-Worker pattern with tool-calling workflows that dynamically route variable-length PDF pages to specialized inference experts — cutting monthly processing costs by ~57% versus the prior OCR-based pipeline.
+  - Deployed fine-tuned Llama3 multi-modal (13B) on AWS as the core reasoning engine for structured entity extraction from unstructured visual data, improving accuracy from 80% to 97% and cutting per-page inference latency from 6s to 4s.
+  - Built guardrails for agentic workflows — a self-reflection layer with automated validation, multi-agent feedback loops, and structured error handling — ensuring data integrity before commits to MongoDB.
+  - Optimized Python and Shell-based automation workflows for weekly system reports by refactoring execution logic and eliminating redundant processing, reducing runtime from 1 hour to 15 minutes.
+  tech:
+  - Python
+  - FastAPI
+  - MongoDB
+  - AWS
+  - Git
+- company: Queen's University at Kingston
+  title: Machine Learning Researcher
+  start: 2021-01
+  end: 2024-01
+  location: Kingston, ON, Canada
+  bullets:
+  - Published “An Empirical Study on the Characteristics of Reusable Code Clones,” TOSEM 2024, using supervised ML classifiers to recommend high-quality code reuse.
+  - Built a reusable ML workflow in Python to classify code fragments, including code dataset extraction and cleansing (~4TB from 60+ large open-source projects), feature engineering and selection (correlation analysis, permutation-based importance), model training and evaluation (Decision Tree, Random Forest, XGBoost, CatBoost, AdaBoost), achieving median AUC of 0.73.
+  - Designed and implemented end-to-end pipelines to prepare 62k+ Python code pairs for LLM fine-tuning, with automated unit-test validation, built-in retry logic, and structured logging for code optimization.
+  tech:
+  - Python
+  - ML
+  - LLM
+  - Git
+- company: Tuhu automative technology Inc.
+  title: Data Engineer
+  start: 2019-11
+  end: 2020-12
+  location: Wuhan, China
+  bullets:
+  - Designed and built a full-stack data warehouse in Hadoop from scratch; implemented production ETL pipelines and analytical workflows to deliver reliable, scalable data for downstream ML and analytics.
+  - Resolved operational issues and optimized pipelines, data warehouses, marts for improved efficiency and scalability.
+  - Managed and enhanced data dictionaries to ensure data consistency and traceability.
+  - Developed visualizations in Tableau and Python to convey user engagement insights, enhancing data-driven decision-making and transparency for stakeholders.
+  - Mentored team members through actionable feedback and knowledge sharing to improve team capability and collaboration.
+  tech:
+  - Python
+  - SQL
+  - Haddop
+  - Git
+- company: Aetna Health Insurance Inc.
+  title: Data Engineer
+  start: 2017-03
+  end: 2019-01
+  location: Hartford, CT, USA
+  bullets:
+  - Built a data pipeline to ingest and process 100M+ vehicle repair records from 100+ sources, using Apache Kafka for real-time data streaming and Apache Spark for batch processing.
+  - Developed a dashboard to visualize vehicle repair trends and patterns, using React and D3.js.
+  - Built a recommendation system to suggest repair parts and services to customers, using machine learning and natural language processing.
+  tech:
+  - Python
+  - SQL
+  - AWS
+  - Git
+  - Tableau
+- company: Huawei Technologies Co., Ltd.
+  title: Data Engineer
+  start: 2015-05
+  end: 2017-03
+  location: Santa Clara, CA, USA
+  bullets:
+  - Applying RAFT (similar to Paxos) protocol to Postgres-XC database system based on Linux Suse 11 to build a more fault tolerant distributed database system.
+  - Automated the installation and configuration of Postgres on each server with bash and python scripting.
+  - Design, build, maintain and optimize data pipelines providing easy access for the business operations team, product managers, and data scientists.
+  - Honed critical thinking and communication skills through weekly technical presentations and discussions.
+  tech:
+  - C
+  - SQL
+education:
+- school: Queen's University
+  degree: Master's Degree in Computer Science
+  focus: ML & AI
+  year: 2021-2024
+  location: Kingston, ON, Canada
+- school: Syracuse University
+  degree: Master's Degree in Computer Science
+  focus: Software Engineering
+  year: 2014-2016
+  location: Syracuse, NY, USA
+skills:
+  languages:
+  - Python
+  - JavaScript
+  - TypeScript
+  - SQL
+  frameworks:
+  - FastAPI
+  - React
+  - Django
+  - Node.js
+  tools:
+  - Docker
+  - Git
+  - AWS
+  - PostgreSQL
+  - Redis
+  - Tableau
+  - MySql
+  - Hadoop
+  - Spark
+
+certifications: "AWS Certified Cloud Practitioner Certification"
+
+preferences:
+  target_titles:
+  - AI Developer
+  - Backend Engineer
+  - Data Engineer
+  min_salary_cad: 90000
+  remote: "hybrid_ok"
+  avoid_companies: []
+  avoid_keywords:
+  - unpaid
+  - commission only
+  - no salary
+  visa_note: "Authorized to work in Canada without sponsorship."

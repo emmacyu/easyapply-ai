@@ -1,0 +1,31 @@
+# Version control
+.git
+.gitignore
+
+# Python
+**/__pycache__/
+**/*.py[cod]
+**/*.egg-info/
+backend/.venv/
+**/.venv/
+**/venv/
+.pytest_cache/
+**/.pytest_cache/
+.mypy_cache/
+
+# Node / frontend build artifacts (rebuilt inside the image)
+frontend/node_modules/
+frontend/dist/
+
+# Local data & secrets (mounted at runtime instead)
+backend/data/jobs.db
+backend/data/output/
+.env
+backend/.env
+
+# Misc
+.DS_Store
+*.log
+Dockerfile
+.dockerignore
+docker-compose.yml

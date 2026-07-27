@@ -1,0 +1,36 @@
+dimensions:
+  skill_match:
+    weight: 25
+    desc: "硬技能与 JD 要求的重合度"
+  experience_level:
+    weight: 15
+    desc: "年限/级别是否匹配（过高过低都扣分）"
+  title_alignment:
+    weight: 10
+    desc: "职位名称与目标方向的一致性"
+  salary_fit:
+    weight: 10
+    desc: "薪资范围（缺失给中性分）"
+  location_remote:
+    weight: 10
+    desc: "地点/远程政策与偏好的匹配"
+  visa_feasibility:
+    weight: 10
+    desc: "身份/签证可行性（出现硬性排除条款给 0）"
+  company_signal:
+    weight: 8
+    desc: "公司规模/行业/口碑信号"
+  growth_potential:
+    weight: 5
+    desc: "技术栈与成长空间"
+  jd_quality:
+    weight: 4
+    desc: "JD 是否具体清晰（模糊海招 JD 扣分）"
+  red_flags:
+    weight: 3
+    desc: "avoid_keywords 命中、明显骗局特征"
+grades:
+  A: 85
+  B: 70
+  C: 55
+  D: 40

@@ -1,0 +1,23 @@
+.env
+backend/.env
+__pycache__/
+*.py[cod]
+*.egg-info/
+.venv/
+backend/.venv/
+venv/
+.pytest_cache/
+.mypy_cache/
+backend/data/jobs.db
+backend/data/output/
+frontend/node_modules/
+frontend/dist/
+.DS_Store
+*.log
+
+# Gmail OAuth secrets
+backend/config/secrets/*.json
+
+# Automation runner (host-side)
+automation/.userdata/
+automation/.venv/
