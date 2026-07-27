@@ -45,14 +45,6 @@ export interface PipelineStatus {
   error?: string | null
 }
 
-export interface ChatMessage {
-  id?: number
-  role: 'user' | 'assistant'
-  content: string
-  audio_url?: string | null
-  created_at?: string
-}
-
 async function request<T>(path: string, options?: RequestInit): Promise<T> {
   const res = await fetch(path, {
     headers: { 'Content-Type': 'application/json' },
@@ -118,26 +110,6 @@ export const api = {
     }),
   deleteAnswer: (key: string) =>
     request<{ status: string }>(`/api/answers/${key}`, { method: 'DELETE' }),
-  chatSessions: (kind?: string) =>
-    request<{ id: number; title: string; updated_at: string }[]>(
-      `/api/chat/sessions${kind ? `?kind=${kind}` : ''}`
-    ),
-  chatNewSession: (kind = 'deepdive') =>
-    request<{ session_id: number; messages: ChatMessage[] }>(
-      `/api/chat/sessions?kind=${kind}`,
-      { method: 'POST' }
-    ),
-  chatGetSession: (id: number) =>
-    request<{ session_id: number; messages: ChatMessage[] }>(`/api/chat/sessions/${id}`),
-  chatSend: (id: number, message: string) =>
-    request<ChatMessage>(`/api/chat/sessions/${id}/message`, {
-      method: 'POST',
-      body: JSON.stringify({ message }),
-    }),
-  chatExtract: (id: number) =>
-    request<{ insights: string }>(`/api/chat/sessions/${id}/extract`, { method: 'POST' }),
-  chatDelete: (id: number) =>
-    request<{ status: string }>(`/api/chat/sessions/${id}`, { method: 'DELETE' }),
   saveJob: (url: string) =>
     request<{ saved: boolean; duplicate: boolean; id: number | null; title: string; company: string }>(
       '/api/jobs/save',

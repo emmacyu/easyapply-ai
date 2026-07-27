@@ -1,15 +1,7 @@
 import { useState } from 'react'
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query'
 import { Link, Outlet, useMatch } from 'react-router-dom'
-import {
-  Bookmark,
-  MessagesSquare,
-  Mic,
-  MonitorSmartphone,
-  Play,
-  Search,
-  User,
-} from 'lucide-react'
+import { Bookmark, Play, Search, User } from 'lucide-react'
 import { api } from '../api/client'
 import { StatsBar } from './StatsBar'
 import { JobCard } from './JobCard'
@@ -97,29 +89,6 @@ export function JobsLayout() {
               <Play className="h-4 w-4" />
               Run Pipeline
             </button>
-            <Link
-              to="/deepdive"
-              className="inline-flex items-center gap-2 rounded-lg border border-border px-3 py-2 text-sm font-medium hover:bg-muted"
-            >
-              <MessagesSquare className="h-4 w-4" />
-              DeepDive
-            </Link>
-            <a
-              href="/oa"
-              target="_blank"
-              rel="noreferrer"
-              className="inline-flex items-center gap-2 rounded-lg border border-border px-3 py-2 text-sm font-medium hover:bg-muted"
-            >
-              <MonitorSmartphone className="h-4 w-4" />
-              OA
-            </a>
-            <Link
-              to="/finalroundai"
-              className="inline-flex items-center gap-2 rounded-lg border border-border px-3 py-2 text-sm font-medium hover:bg-muted"
-            >
-              <Mic className="h-4 w-4" />
-              FinalRoundAI
-            </Link>
             <Link
               to="/profile"
               className="inline-flex items-center gap-2 rounded-lg border border-border px-3 py-2 text-sm font-medium hover:bg-muted"

@@ -1,8 +1,9 @@
 """JobPilot API — app assembly only.
 
-Each feature lives in its own router under `src/web/routers/` (pipeline,
-deepdive, finalround, oa, core). This module just creates the app,
-adds middleware, wires the routers, and serves the built frontend (SPA).
+This repo is the job-search / apply pipeline. Its features live in routers under
+`src/web/routers/` (pipeline, core). The interview/assessment features were split
+into their own repos (jobpilot-copilot, jobpilot-presentation). This module just
+creates the app, adds middleware, wires the routers, and serves the frontend (SPA).
 """
 
 from __future__ import annotations
@@ -15,7 +16,7 @@ from fastapi.responses import FileResponse
 from fastapi.staticfiles import StaticFiles
 
 from src.web.deps import FRONTEND_DIST
-from src.web.routers import core, deepdive, finalround, oa, pipeline
+from src.web.routers import core, pipeline
 
 logger = logging.getLogger(__name__)
 
@@ -33,7 +34,7 @@ app.add_middleware(
 
 # Wire each section's router. Paths are unchanged (no prefixes) — this is a pure
 # internal reorg, so the frontend/extension contract is identical.
-for module in (pipeline, core, deepdive, finalround, oa):
+for module in (pipeline, core):
     app.include_router(module.router)
 
 

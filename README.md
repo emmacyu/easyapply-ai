@@ -1,7 +1,10 @@
 # JobPilot — 个人求职全流程自动化（自用）
 
 > 一个跑在本地的个人求职自动化系统。从最初的「发现→评分→定制材料」求职管道，已成长为覆盖**求职全流程**的自用工具箱：
-> **自动发现职位 → AI 打分筛选 → 定制简历/求职信 → 浏览器扩展自动填表 → 面试实时副驾（FinalRoundAI）→ OA 截图答题 → 公司/岗位深挖（DeepDive）→ Gmail 验证码读取**。
+> **自动发现职位 → AI 打分筛选 → 定制简历/求职信 → 浏览器扩展一键填表投递 → Gmail 验证码读取**。
+>
+> 📦 **本仓库现聚焦「发现→投递」主管道。** 面试/测评相关功能已拆分为独立仓库：
+> **DeepDive + FinalRoundAI + OA → `jobpilot-copilot`**；**Presentation → `jobpilot-presentation`**。
 >
 > 设计原则：**自动化"准备"，人工"提交"**（human-in-the-loop）。不做全自动投递，不碰账号风控红线。
 >
@@ -30,10 +33,7 @@
 | 画像在线编辑（保留注释的 YAML 往返写回） | `config_store.py`、`pages/Profile.tsx` | ✅ 可用 |
 | Chrome 扩展自动填表（只填不交，含 Workday） | `extension/` | ✅ 可用 |
 | 表单问题 AI 作答 + 答案记忆缓存 | `ai/answerer.py`、`bq_store.py` | ✅ 可用 |
-| DeepDive：教练式深挖你的经历 → 提炼素材 | `ai/deepdive.py`、`pages/DeepDive.tsx` | ✅ 可用 |
-| FinalRoundAI 文字版：以"你"的口吻答面试题 | `ai/deepdive.py`(finalround 模式)、`pages/FinalRoundAI.tsx` | ✅ 可用 |
-| FinalRoundAI 音频版：抓会议 tab 音频 → Gemini 转写+作答 | `ai/finalround_audio.py`、扩展 `background.js` | 🟡 脚手架完成，真实会议未测 |
-| OA 截图答题 + iPad 上**对话追问改解法**（`/oa`） | `ai/oa_vision.py`、`/api/oa/*` + `.../refine` | ✅ 可用（截图与追问链路已验证） |
+| DeepDive / FinalRoundAI（文字+音频）/ OA 截图答题 | **已拆分为独立仓库 `jobpilot-copilot`** | ↗ 移出本仓库 |
 | Presentation：GitHub 仓库 → LLM → 幻灯片 → `.pptx` / Google Slides | **已拆分为独立仓库 `jobpilot-presentation`** | ↗ 移出本仓库 |
 | Gmail 只读读取注册验证码（限 `emmayu.cs@gmail.com`） | `integrations/gmail_client.py` | 🔴 代码就绪，等你完成 Google Cloud OAuth 配置 |
 | Playwright 半自动 Greenhouse 投递（暂停等人工 Submit） | `automation/apply.py` | 🔴 脚手架完成，真实页面未测 |
@@ -117,7 +117,6 @@ easyapply-ai/
 │   │   │   ├── scorer.py       # 10 维加权评分
 │   │   │   ├── resume_tailor.py# 整篇 .tex 保守改写 + 编译自愈（简历+求职信）
 │   │   │   ├── answerer.py     # 表单问题作答（bq → 缓存 → LLM），带答案记忆
-│   │   │   ├── deepdive.py     # 聊天引擎：deepdive（挖经历）+ finalround（以你口吻答题）两模式
 │   │   │   ├── oa_vision.py    # 截图 → Gemini 读题作答（Gemini-only）
 │   │   │   └── finalround_audio.py # 会议音频 → Gemini 转写+作答（Gemini-only）
 │   │   ├── prompts/            # score_job / tailor_resume_tex / cover_letter_tex / fix_latex /
@@ -131,16 +130,16 @@ easyapply-ai/
 │   │           ├── pipeline.py    # Run Pipeline：职位看板 + 发现/评分/定制 + stats
 │   │           ├── deepdive.py    # 聊天会话（FinalRoundAI 文字版按 kind 复用）
 │   │           ├── finalround.py  # FinalRoundAI 音频（转写+作答）
-│   │           ├── oa.py          # OA 截图答题 + /oa iPad 查看页
 │   │           └── core.py        # 共享：答案库 + profile + gmail
-│   │                              #（Presentation 已拆分为独立仓库 jobpilot-presentation）
+│   │                              #（DeepDive/FinalRoundAI/OA → jobpilot-copilot；
+│   │                              # Presentation → jobpilot-presentation）
 │   ├── data/                   # jobs.db + output/（gitignore，容器里为命名卷）
 │   └── tests/test_pipeline.py  # mock provider 跑通各阶段 + 去重单测
 ├── frontend/                   # React 看板（Vite + TS）
 │   └── src/
-│       ├── main.tsx            # 路由：/  /jobs/:id  /profile  /deepdive  /finalroundai
+│       ├── main.tsx            # 路由：/  /jobs/:id  /profile
 │       ├── components/         # JobsLayout / JobCard / StatsBar / ScoreBadge / ScoreBreakdown / StatusActions
-│       ├── pages/              # JobDetail / EmptyDetail / Profile / DeepDive / FinalRoundAI
+│       ├── pages/              # JobDetail / EmptyDetail / Profile
 │       └── api/client.ts       # 前后端契约封装
 ├── extension/                  # Chrome 扩展（MV3）
 │   ├── manifest.json
@@ -325,26 +324,13 @@ Gemini 免费层按模型按天限额（flash 系列约 20 次/天）。主模�
 
 接口：`GET /api/gmail/status`、`GET /api/gmail/verification?sender=&minutes=`。
 
-### 8.7 DeepDive & FinalRoundAI 文字版（`ai/deepdive.py`）
+### 8.7 面试/测评功能（已拆分为独立仓库）
 
-同一聊天引擎两种模式（`chat_sessions.kind` 区分）：
-- **DeepDive**（`/deepdive`）：教练主动开场提问，逐步挖你的项目经历/量化结果；随时 `POST /extract` 把对话提炼成可粘贴到简历/答案的素材。
-- **FinalRoundAI 文字版**（`/finalroundai`）：你贴入面试官的问题 → 系统以**第一人称"你"**、基于 profile/bq/简历给出可直接照读的答案（定位为"提词器"，不编造经历）。
+**DeepDive（经历深挖）、FinalRoundAI（面试实时副驾，文字+音频）、OA（截图答题 + `/oa` iPad 查看页）** 已整体拆出为独立服务 **`jobpilot-copilot`**（自带 LLM provider + profile + 聊天/OA 的 DB 表）。
+**Presentation（GitHub 仓库 → 幻灯片 → `.pptx`/Google Slides）** 拆为 **`jobpilot-presentation`**。
+各自用法见对应仓库的 README。
 
-### 8.8 FinalRoundAI 音频版 🟡 未在真实会议验证
-
-扩展悬浮窗抓会议 tab 音频（用户选 tab + "Share tab audio"）→ MediaRecorder 片段 → `background.js` → `POST /api/finalround/audio` → Gemini **一次调用完成转写+作答**。
-> 已知待真实调优点：Gemini 可能拒 `webm/opus`（回退浏览器内 WAV 编码或服务端 ffmpeg）；无环形缓冲（片段=自上次 Answer 起）；悬浮窗是页面 DOM，**在屏幕共享里可见**（隐形悬浮窗需未来的 macOS 桌面版）。平台路线图：Chrome 扩展 → macOS（ScreenCaptureKit 系统音频 + `NSWindowSharingNone` 隐形窗）→ Windows（WASAPI loopback + `WDA_EXCLUDEFROMCAPTURE`）。
-
-### 8.9 OA 截图答题（可对话追问）
-
-扩展 "🖥️ OA screening" 截屏 → `POST /api/oa/answer`（Gemini 视觉读题：编程题给解法 / 行为题基于 profile 作答 / 选择题选项）→ 结果存 `oa_answers` 表，`GET /oa` 查看页轮询显示（可在**另一台设备如 iPad** 上打开，屏幕不与考试同屏）。
-
-**可对话追问**：`/oa` 页面每条答案下方有输入框——看到解法后可直接提要求让它改（"改成 O(n)"、"用 Java 重写"、"加注释"、"精简一点"），`POST /api/oa/{id}/refine {message}` 会**带着原始截图 + 之前的对话**再问一次 Gemini，得到修订版并接在对话线程里。原始截图存服务端（不进轮询负载）、每次追问重新附上以保留完整视觉上下文。历史/清空：`GET /api/oa/history`、`DELETE /api/oa`。
-
-### 8.11 Presentation（已拆分为独立仓库）
-
-「GitHub 仓库 → 幻灯片 → `.pptx` / Google Slides」功能**已从本仓库拆出**，成为独立服务 **`jobpilot-presentation`**（自带 LLM provider，无需 DB/画像）。详见该仓库的 README。
+> ⚠️ 遗留项：`extension/` 里的 **🖥️ OA screening** 与 **🎤 FinalRoundAI** 两个按钮仍指向本地 `:8000` 的 `/api/oa/*`、`/api/finalround/audio`——这些端点已随功能移到 `jobpilot-copilot`。要继续用这两个按钮，需把扩展指向 copilot 服务（默认 `:8020`），或把它们移到 copilot 侧。填表/投递相关按钮不受影响。
 
 ### 8.10 Playwright 半自动投递器（`automation/apply.py`）🔴 未在真实页面验证
 
@@ -380,30 +366,12 @@ GET    /api/answers         列出已缓存答案（可复核）
 PUT    /api/answers/{key}   人工修订某答案（标记 reviewed）
 DELETE /api/answers/{key}   删除某缓存答案
 ```
-**DeepDive / FinalRoundAI 文字**
-```
-GET/POST /api/chat/sessions               列出/新建会话（body.kind = deepdive|finalround）
-GET      /api/chat/sessions/{id}          会话消息
-POST     /api/chat/sessions/{id}/message  发一条消息，返回助手回复
-POST     /api/chat/sessions/{id}/extract  把 deepdive 对话提炼成素材
-DELETE   /api/chat/sessions/{id}          删除会话
-GET      /api/chat/messages/{mid}/audio   （音频消息回放）
-```
-**FinalRoundAI 音频 / OA 视觉**
-```
-POST   /api/finalround/audio    {audio_base64, mime_type} → Gemini 转写+作答
-POST   /api/oa/answer           截图 → Gemini 读题作答
-POST   /api/oa/{id}/refine       对该答案追问改进（带原截图+对话重新问 Gemini）
-GET    /api/oa/latest           /oa 查看页轮询最新答案
-GET    /api/oa/history          历史
-DELETE /api/oa                  清空
-GET    /oa                      iPad 查看页（HTML）
-```
+（DeepDive/FinalRoundAI 的 `/api/chat/*`、OA 的 `/api/oa/*`+`/oa` 已随功能移到 `jobpilot-copilot`；Presentation 端点移到 `jobpilot-presentation`）
+
 **Gmail / 画像 / 管道 / 统计**
 ```
 GET  /api/gmail/status                         连接状态与允许账户
 GET  /api/gmail/verification?sender=&minutes=  最近验证码
-（Presentation 相关端点已随功能移到 jobpilot-presentation 仓库）
 GET  /api/profile                              画像（供扩展填表）
 GET/PUT /api/profile/raw                        原始 YAML（供 Profile UI 读/写）
 POST /api/pipeline/run                          手动触发完整管道（后台任务）
@@ -416,13 +384,11 @@ GET  /{full_path}                               SPA 兜底（生产模式挂载 
 
 ---
 
-## 9. 前端页面（React，路由 `/  /jobs/:id  /profile  /deepdive  /finalroundai`）
+## 9. 前端页面（React，路由 `/  /jobs/:id  /profile`）
 
 - **JobList（`/`）**：顶部 StatsBar（今日新增/待处理/已投递/回复率）+ 状态 Tab + Grade 多选 + 关键词搜索；职位卡片按分数降序（公司/职位/地点/薪资/ScoreBadge/状态/发布时间 + Shortlist/Discard 快捷键）；状态变更用 TanStack Query 乐观更新，失败回滚 + toast。
 - **JobDetail（`/jobs/:id`）**：左 JD 全文（Markdown）；右 ScoreBreakdown（10 维得分条+理由）、red flags、材料区（生成/预览/对比/diff/下载）、"打开申请页"主按钮、StatusActions。
 - **Profile（`/profile`）**：在线编辑 `profile.yaml`（保留注释往返写回）。
-- **DeepDive（`/deepdive`）**：教练式深挖对话 + 一键提炼素材。
-- **FinalRoundAI（`/finalroundai`）**：文字版面试副驾。
 
 通用：暗色/亮色跟随系统；服务端状态全交 TanStack Query（无 Redux）。
 
