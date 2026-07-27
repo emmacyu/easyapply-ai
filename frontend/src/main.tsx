@@ -8,7 +8,6 @@ import { EmptyDetail } from './pages/EmptyDetail'
 import { Profile } from './pages/Profile'
 import { DeepDive } from './pages/DeepDive'
 import { FinalRoundAI } from './pages/FinalRoundAI'
-import { Presentation } from './pages/Presentation'
 import './index.css'
 
 const queryClient = new QueryClient({
@@ -25,7 +24,6 @@ ReactDOM.createRoot(document.getElementById('root')!).render(
           <Route path="/profile" element={<Profile />} />
           <Route path="/deepdive" element={<DeepDive />} />
           <Route path="/finalroundai" element={<FinalRoundAI />} />
-          <Route path="/presentation" element={<Presentation />} />
           <Route element={<JobsLayout />}>
             <Route index element={<EmptyDetail />} />
             <Route path="jobs/:id" element={<JobDetail />} />

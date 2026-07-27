@@ -8,7 +8,6 @@ services:
     ports:
       - "8000:8000"
       - "8765:8765"   # one-time Gmail OAuth loopback (python main.py gmail-auth)
-      - "8766:8766"   # one-time Google Slides OAuth loopback (python main.py gslides-auth)
     # Pass LLM provider + API keys from the repo-root .env (copy from backend/.env.example)
     env_file:
       - .env

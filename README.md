@@ -34,7 +34,7 @@
 | FinalRoundAI 文字版：以"你"的口吻答面试题 | `ai/deepdive.py`(finalround 模式)、`pages/FinalRoundAI.tsx` | ✅ 可用 |
 | FinalRoundAI 音频版：抓会议 tab 音频 → Gemini 转写+作答 | `ai/finalround_audio.py`、扩展 `background.js` | 🟡 脚手架完成，真实会议未测 |
 | OA 截图答题 + iPad 上**对话追问改解法**（`/oa`） | `ai/oa_vision.py`、`/api/oa/*` + `.../refine` | ✅ 可用（截图与追问链路已验证） |
-| Presentation：GitHub 仓库 → LLM → 幻灯片 → `.pptx` / Google Slides | `integrations/github_repo.py`、`ai/presentation.py`、`render/pptx.py`、`integrations/gslides_client.py` | 🟡 `.pptx` 链路已验证；Google Slides 导出与参考链接读取已接好但等 OAuth |
+| Presentation：GitHub 仓库 → LLM → 幻灯片 → `.pptx` / Google Slides | **已拆分为独立仓库 `jobpilot-presentation`** | ↗ 移出本仓库 |
 | Gmail 只读读取注册验证码（限 `emmayu.cs@gmail.com`） | `integrations/gmail_client.py` | 🔴 代码就绪，等你完成 Google Cloud OAuth 配置 |
 | Playwright 半自动 Greenhouse 投递（暂停等人工 Submit） | `automation/apply.py` | 🔴 脚手架完成，真实页面未测 |
 | APScheduler 每日定时抓取 | `scheduler.py` | ✅ 可用（`serve --schedule`） |
@@ -132,8 +132,8 @@ easyapply-ai/
 │   │           ├── deepdive.py    # 聊天会话（FinalRoundAI 文字版按 kind 复用）
 │   │           ├── finalround.py  # FinalRoundAI 音频（转写+作答）
 │   │           ├── oa.py          # OA 截图答题 + /oa iPad 查看页
-│   │           ├── presentation.py# GitHub 仓库 → 幻灯片 → .pptx / Google Slides
 │   │           └── core.py        # 共享：答案库 + profile + gmail
+│   │                              #（Presentation 已拆分为独立仓库 jobpilot-presentation）
 │   ├── data/                   # jobs.db + output/（gitignore，容器里为命名卷）
 │   └── tests/test_pipeline.py  # mock provider 跑通各阶段 + 去重单测
 ├── frontend/                   # React 看板（Vite + TS）
@@ -342,16 +342,9 @@ Gemini 免费层按模型按天限额（flash 系列约 20 次/天）。主模�
 
 **可对话追问**：`/oa` 页面每条答案下方有输入框——看到解法后可直接提要求让它改（"改成 O(n)"、"用 Java 重写"、"加注释"、"精简一点"），`POST /api/oa/{id}/refine {message}` 会**带着原始截图 + 之前的对话**再问一次 Gemini，得到修订版并接在对话线程里。原始截图存服务端（不进轮询负载）、每次追问重新附上以保留完整视觉上下文。历史/清空：`GET /api/oa/history`、`DELETE /api/oa`。
 
-### 8.11 Presentation：把 GitHub 仓库变成幻灯片（`/presentation`）
+### 8.11 Presentation（已拆分为独立仓库）
 
-顶栏 **Presentation** 页：填一个 **GitHub 仓库 URL** → 后端用公开 GitHub API 拉 **README + 一部分源码**（按扩展名优先级挑，最多 25 个文件、单文件 6k 字符、总量 45k 字符，跳过 node_modules/dist 等）→ **Gemini** 生成一套技术演讲幻灯片（每页标题 + 2–5 条要点 + 演讲备注，硬约束不编造）→ 页面预览。
-
-- **参考风格**（可选）：给一个 **Google Slides 链接**（需先连 Google，见下），后端读取其文字作为风格/结构样例;或直接**粘贴大纲文本**（无需 Google 即可用）。
-- **导出**：
-  - **`.pptx`**（`python-pptx`）：立即可用、无需 Google 登录，下载后可手动导入 Google Slides。**已验证。**
-  - **Google Slides**：用 Slides API 直接在你的 Google 里建一份（`POST /api/presentation/google-slides`）。**需先配 OAuth**（见下），配好前按钮禁用。
-- **私有仓库/限流**：设 `GITHUB_TOKEN` 环境变量即可读私有仓库、提高速率上限。
-- **连接 Google（一次性，用于参考链接读取 + Google Slides 导出）**：和 Gmail 同一套 OAuth 客户端文件（`config/secrets/gmail_credentials.json`），但用独立 token 与 `presentations`+`drive.readonly` 权限、**不限账户**。在 Google Cloud 启用 **Google Slides API + Drive API** → 运行 `docker compose exec jobpilot python main.py gslides-auth`（端口 8766）→ 登录授权。`GET /api/google/status` 查看是否已连。
+「GitHub 仓库 → 幻灯片 → `.pptx` / Google Slides」功能**已从本仓库拆出**，成为独立服务 **`jobpilot-presentation`**（自带 LLM provider，无需 DB/画像）。详见该仓库的 README。
 
 ### 8.10 Playwright 半自动投递器（`automation/apply.py`）🔴 未在真实页面验证
 
@@ -410,10 +403,7 @@ GET    /oa                      iPad 查看页（HTML）
 ```
 GET  /api/gmail/status                         连接状态与允许账户
 GET  /api/gmail/verification?sender=&minutes=  最近验证码
-GET  /api/google/status                        Google Slides/Drive 是否已连接（门控导出/参考读取）
-POST /api/presentation/generate                {repo_url, reference_slides_url?, reference_text?, target_slides?} → 幻灯片 deck
-POST /api/presentation/pptx                    body=deck → 下载 .pptx
-POST /api/presentation/google-slides           body=deck → 在 Google 里建一份 Slides（OAuth 门控）
+（Presentation 相关端点已随功能移到 jobpilot-presentation 仓库）
 GET  /api/profile                              画像（供扩展填表）
 GET/PUT /api/profile/raw                        原始 YAML（供 Profile UI 读/写）
 POST /api/pipeline/run                          手动触发完整管道（后台任务）
@@ -426,14 +416,13 @@ GET  /{full_path}                               SPA 兜底（生产模式挂载 
 
 ---
 
-## 9. 前端页面（React，路由 `/  /jobs/:id  /profile  /deepdive  /finalroundai  /presentation`）
+## 9. 前端页面（React，路由 `/  /jobs/:id  /profile  /deepdive  /finalroundai`）
 
 - **JobList（`/`）**：顶部 StatsBar（今日新增/待处理/已投递/回复率）+ 状态 Tab + Grade 多选 + 关键词搜索；职位卡片按分数降序（公司/职位/地点/薪资/ScoreBadge/状态/发布时间 + Shortlist/Discard 快捷键）；状态变更用 TanStack Query 乐观更新，失败回滚 + toast。
 - **JobDetail（`/jobs/:id`）**：左 JD 全文（Markdown）；右 ScoreBreakdown（10 维得分条+理由）、red flags、材料区（生成/预览/对比/diff/下载）、"打开申请页"主按钮、StatusActions。
 - **Profile（`/profile`）**：在线编辑 `profile.yaml`（保留注释往返写回）。
 - **DeepDive（`/deepdive`）**：教练式深挖对话 + 一键提炼素材。
 - **FinalRoundAI（`/finalroundai`）**：文字版面试副驾。
-- **Presentation（`/presentation`）**：GitHub 仓库 → 幻灯片（.pptx / Google Slides），见 §8.11。
 
 通用：暗色/亮色跟随系统；服务端状态全交 TanStack Query（无 Redux）。
 

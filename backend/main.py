@@ -95,18 +95,6 @@ def cmd_gmail_auth(args: argparse.Namespace) -> None:
     print(f"\n✅ Connected: {email}")
 
 
-def cmd_gslides_auth(args: argparse.Namespace) -> None:
-    from src.integrations.gslides_client import authorize
-
-    print("Authorizing Google Slides + Drive (read-only) access.")
-    print(
-        "A URL will be printed. Open it, sign in with the Google account where you "
-        "want presentations created, and approve. (In Docker, publish the auth port.)"
-    )
-    authorize(port=args.port, open_browser=args.open_browser)
-    print("\n✅ Google Slides connected.")
-
-
 def main() -> None:
     parser = argparse.ArgumentParser(description="JobPilot — job search automation")
     parser.add_argument("-v", "--verbose", action="store_true")
@@ -133,10 +121,6 @@ def main() -> None:
     gmail_p.add_argument("--port", type=int, default=8765, help="Loopback OAuth port")
     gmail_p.add_argument("--open-browser", action="store_true", help="Try to open a browser")
 
-    gslides_p = sub.add_parser("gslides-auth", help="Connect Google Slides + Drive (OAuth)")
-    gslides_p.add_argument("--port", type=int, default=8766, help="Loopback OAuth port")
-    gslides_p.add_argument("--open-browser", action="store_true", help="Try to open a browser")
-
     args = parser.parse_args()
     setup_logging(args.verbose)
 
@@ -148,7 +132,6 @@ def main() -> None:
         "tailor": cmd_tailor,
         "serve": cmd_serve,
         "gmail-auth": cmd_gmail_auth,
-        "gslides-auth": cmd_gslides_auth,
     }
     commands[args.command](args)
 

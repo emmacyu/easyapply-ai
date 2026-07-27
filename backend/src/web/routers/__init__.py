@@ -4,10 +4,11 @@
 - deepdive     — chat sessions (also serves FinalRoundAI text via `kind`)
 - finalround   — FinalRoundAI audio (transcribe + answer)
 - oa           — OA screenshot answering + `/oa` iPad viewer
-- presentation — GitHub repo → slide deck → .pptx / Google Slides
 - core         — shared: answer bank, profile, gmail
+
+(Presentation was extracted to its own repo: jobpilot-presentation.)
 """
 
-from . import core, deepdive, finalround, oa, pipeline, presentation
+from . import core, deepdive, finalround, oa, pipeline
 
-__all__ = ["core", "deepdive", "finalround", "oa", "pipeline", "presentation"]
+__all__ = ["core", "deepdive", "finalround", "oa", "pipeline"]

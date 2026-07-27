@@ -29,19 +29,6 @@ export interface JobListResponse {
   page_size: number
 }
 
-export interface Slide {
-  title: string
-  bullets: string[]
-  notes: string
-}
-
-export interface Deck {
-  title: string
-  subtitle: string
-  slides: Slide[]
-  repo?: { full_name: string; url: string }
-}
-
 export interface Stats {
   today_new: number
   pending: number
@@ -156,40 +143,4 @@ export const api = {
       '/api/jobs/save',
       { method: 'POST', body: JSON.stringify({ url }) }
     ),
-  googleStatus: () => request<{ connected: boolean }>('/api/google/status'),
-  generatePresentation: (body: {
-    repo_url: string
-    reference_slides_url?: string
-    reference_text?: string
-    target_slides?: number
-  }) =>
-    request<Deck>('/api/presentation/generate', {
-      method: 'POST',
-      body: JSON.stringify(body),
-    }),
-  createGoogleSlides: (deck: Deck) =>
-    request<{ id: string; url: string }>('/api/presentation/google-slides', {
-      method: 'POST',
-      body: JSON.stringify({ deck }),
-    }),
-  downloadPptx: async (deck: Deck): Promise<void> => {
-    const res = await fetch('/api/presentation/pptx', {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ deck }),
-    })
-    if (!res.ok) {
-      const err = await res.json().catch(() => ({ detail: res.statusText }))
-      throw new Error(err.detail || 'PPTX export failed')
-    }
-    const blob = await res.blob()
-    const url = URL.createObjectURL(blob)
-    const a = document.createElement('a')
-    a.href = url
-    a.download = (deck.title || 'presentation').replace(/[^a-z0-9 _-]/gi, '_') + '.pptx'
-    document.body.appendChild(a)
-    a.click()
-    a.remove()
-    URL.revokeObjectURL(url)
-  },
 }

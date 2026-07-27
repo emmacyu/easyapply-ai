@@ -7,7 +7,6 @@ import {
   Mic,
   MonitorSmartphone,
   Play,
-  Presentation as PresentationIcon,
   Search,
   User,
 } from 'lucide-react'
@@ -120,13 +119,6 @@ export function JobsLayout() {
             >
               <Mic className="h-4 w-4" />
               FinalRoundAI
-            </Link>
-            <Link
-              to="/presentation"
-              className="inline-flex items-center gap-2 rounded-lg border border-border px-3 py-2 text-sm font-medium hover:bg-muted"
-            >
-              <PresentationIcon className="h-4 w-4" />
-              Presentation
             </Link>
             <Link
               to="/profile"
