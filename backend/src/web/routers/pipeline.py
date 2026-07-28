@@ -191,7 +191,7 @@ def get_job(job_id: int) -> JobResponse:
 
 @router.patch("/api/jobs/{job_id}/status", response_model=JobResponse)
 def update_status(job_id: int, body: StatusUpdate) -> JobResponse:
-    if not db.update_job_status(job_id, body.status):
+    if not db.update_job_status(job_id, body.status, evidence=body.evidence):
         job = db.get_job(job_id)
         if not job:
             raise HTTPException(status_code=404, detail="Job not found")
@@ -201,6 +201,33 @@ def update_status(job_id: int, body: StatusUpdate) -> JobResponse:
         )
     job = db.get_job(job_id)
     return JobResponse(**job_to_response(job))
+
+
+# --------------------------------------------------------------------------- #
+# Blocker queue (ApplyPilot-style): record what stopped an application.
+# --------------------------------------------------------------------------- #
+@router.post("/api/jobs/{job_id}/blocker")
+def add_blocker(job_id: int, body: dict[str, Any]) -> dict[str, Any]:
+    kind = (body.get("kind") or "").strip() or "other"
+    bid = db.add_blocker(
+        job_id=job_id,
+        kind=kind,
+        detail=(body.get("detail") or "").strip(),
+        needs_user=bool(body.get("needs_user", True)),
+    )
+    return {"id": bid, "job_id": job_id, "kind": kind}
+
+
+@router.get("/api/blockers")
+def list_blockers(job_id: int | None = None, resolved: bool | None = None) -> list[dict[str, Any]]:
+    return db.list_blockers(job_id=job_id, resolved=resolved)
+
+
+@router.post("/api/blockers/{blocker_id}/resolve")
+def resolve_blocker(blocker_id: int) -> dict[str, str]:
+    if not db.resolve_blocker(blocker_id):
+        raise HTTPException(status_code=404, detail="Blocker not found")
+    return {"status": "ok"}
 
 
 @router.get("/api/jobs/{job_id}/resume")

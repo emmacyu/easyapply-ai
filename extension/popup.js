@@ -29,7 +29,24 @@ async function doFill(tab, profile) {
     func: fillForm,
     args: [profile],
   })
-  return results.reduce((n, r) => n + ((r.result && r.result.filled) || 0), 0)
+  const filled = results.reduce((n, r) => n + ((r.result && r.result.filled) || 0), 0)
+  const fields = []
+  for (const r of results) for (const f of (r.result && r.result.fields) || []) fields.push(f)
+  return { filled, fields }
+}
+
+// Log a blocker (ApplyPilot-style) against the selected job, if any.
+async function logBlocker(jobId, kind, detail) {
+  if (!jobId) return
+  try {
+    await fetch(`${BACKEND}/api/jobs/${jobId}/blocker`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ kind, detail }),
+    })
+  } catch (e) {
+    /* best-effort */
+  }
 }
 
 async function doAiAnswer(tab, setMsg) {
@@ -92,7 +109,10 @@ async function doAttachResume(tab, jobId, setMsg) {
     func: attachResumeFn,
     args: [b64, `resume_${jobId}.pdf`],
   })
-  return { attached: results.reduce((n, r) => n + ((r.result && r.result.attached) || 0), 0) }
+  return {
+    attached: results.reduce((n, r) => n + ((r.result && r.result.attached) || 0), 0),
+    verified: results.reduce((n, r) => n + ((r.result && r.result.verified) || 0), 0),
+  }
 }
 
 // Populate the resume picker from jobs that already have tailored materials,
@@ -144,7 +164,7 @@ fillBtn.addEventListener('click', async () => {
   const tab = await activeTab()
   setStatus('Filling… (Workday dropdowns take a moment)')
   try {
-    const filled = await doFill(tab, profile)
+    const { filled } = await doFill(tab, profile)
     if (filled > 0) {
       setStatus(`Filled ${filled} field(s). Review the green-outlined fields, then submit.`, 'ok')
     } else {
@@ -174,21 +194,37 @@ applyBtn.addEventListener('click', async () => {
   const jobId = document.getElementById('applyJob').value
   try {
     setStatus('Filling fields… (Workday dropdowns take a moment)')
-    const filled = await doFill(tab, profile)
+    const { filled, fields } = await doFill(tab, profile)
     const { answered } = await doAiAnswer(tab, setStatus)
     let resumeMsg = ''
     if (jobId) {
       try {
-        const { attached } = await doAttachResume(tab, jobId, setStatus)
-        resumeMsg = attached
-          ? ' Resume attached.'
-          : ' (No file upload found on this page — attach resume manually.)'
+        const { attached, verified } = await doAttachResume(tab, jobId, setStatus)
+        if (attached && verified) {
+          resumeMsg = ' Resume attached ✓.'
+        } else if (attached) {
+          resumeMsg = ' Resume set but NOT verified — check the upload!'
+          logBlocker(jobId, 'upload', 'resume file set but could not be verified')
+        } else {
+          resumeMsg = ' (No file upload found — attach resume manually.)'
+          logBlocker(jobId, 'missing_file', 'no file input found on the application page')
+        }
       } catch (e) {
         resumeMsg = ` (Resume attach failed: ${e.message} — attach manually.)`
+        logBlocker(jobId, 'upload', `resume attach failed: ${e.message}`)
       }
     }
+    if (filled === 0 && answered === 0) {
+      logBlocker(jobId, 'other', 'nothing filled — form may be a custom/complex ATS')
+    }
+    // Pre-submit summary of high-impact fields (work auth / sponsorship / comp / EEO).
+    const important = fields.filter((f) => f.important)
+    const summary = important.length
+      ? '\n\n⚠ Review before Submit:\n' + important.map((f) => `• ${f.label}: ${f.value}`).join('\n')
+      : ''
     setStatus(
-      `✓ Filled ${filled} field(s), AI-answered ${answered}.${resumeMsg} Review everything (green = profile, blue = AI), then click the site's Submit.`,
+      `✓ Filled ${filled} field(s), AI-answered ${answered}.${resumeMsg}\n` +
+        `Green = profile, blue = AI. Review, then click the site's Submit.${summary}`,
       'ok'
     )
   } catch (e) {
@@ -565,6 +601,7 @@ function attachResumeFn(b64, filename) {
 
   const inputs = [...document.querySelectorAll('input[type="file"]')].filter((el) => !el.disabled)
   let attached = 0
+  let verified = 0
   for (const input of inputs) {
     // With multiple file inputs, only fill the resume-ish one (skip cover letter,
     // transcripts, etc.). A lone file input on an application form is the resume.
@@ -584,13 +621,19 @@ function attachResumeFn(b64, filename) {
       input.files = dt.files
       input.dispatchEvent(new Event('input', { bubbles: true }))
       input.dispatchEvent(new Event('change', { bubbles: true }))
-      input.style.outline = '2px solid #22c55e'
       attached++
+      // Verify the file actually stuck (some ATS reject programmatic sets).
+      if (input.files && input.files.length > 0) {
+        verified++
+        input.style.outline = '2px solid #22c55e'
+      } else {
+        input.style.outline = '2px solid #f59e0b' // amber = set but unverified
+      }
     } catch (e) {
       /* this input rejected the file */
     }
   }
-  return { attached }
+  return { attached, verified }
 }
 
 function scanPage() {
@@ -647,10 +690,13 @@ async function fillForm(profile) {
   const fullName = P.name || [firstName, lastName].filter(Boolean).join(' ')
 
   const entries = []
-  const add = (aliases, value) => {
+  // `important` marks high-impact fields (work auth / sponsorship / comp / EEO)
+  // that the pre-submit summary surfaces for the user to review.
+  const add = (aliases, value, important) => {
     if (value === undefined || value === null || value === '' || typeof value === 'boolean') return
-    entries.push({ aliases: aliases.map(norm), value: String(value) })
+    entries.push({ aliases: aliases.map(norm), value: String(value), important: !!important })
   }
+  const filledFields = [] // {label, value, important} for the pre-submit summary
   add(['first name', 'given name', 'legal first name'], firstName)
   add(['last name', 'surname', 'family name', 'legal last name'], lastName)
   add(['full name', 'legal name', 'applicant name', 'full legal name', 'first and last name'], fullName)
@@ -667,13 +713,13 @@ async function fillForm(profile) {
   add(['country', 'country of residence'], country)
   add(['linkedin', 'linkedin url', 'linkedin profile'], P.linkedin)
   add(['github', 'github url', 'portfolio', 'website'], P.github)
-  add(['salary', 'salary expectation', 'expected salary', 'base salary', 'compensation', 'annual base salary'], profile.min_salary_cad)
-  add(['legally eligible to work', 'authorized to work', 'eligible to work', 'legally authorized', 'right to work', 'work authorization', 'legally entitled to work'], 'Yes')
-  add(['require sponsorship', 'need sponsorship', 'visa sponsorship', 'sponsorship'], P.needs_sponsorship ? 'Yes' : 'No')
-  add(['veteran', 'military service', 'armed forces', 'served in the military'], P['had any Canadian military service?'])
-  add(['indigenous person', 'indigenous', 'first nations', 'aboriginal'], P['an Indigenous/Aboriginal person who is First Nations, Inuit or Métis?'])
-  add(['disability', 'person with a disability', 'non visible disability', 'visible or non visible disability'], P['a person with a disability'])
-  add(['visible minority', 'member of a visible minority'], P['visible minority group'])
+  add(['salary', 'salary expectation', 'expected salary', 'base salary', 'compensation', 'annual base salary'], profile.min_salary_cad, true)
+  add(['legally eligible to work', 'authorized to work', 'eligible to work', 'legally authorized', 'right to work', 'work authorization', 'legally entitled to work'], 'Yes', true)
+  add(['require sponsorship', 'need sponsorship', 'visa sponsorship', 'sponsorship'], P.needs_sponsorship ? 'Yes' : 'No', true)
+  add(['veteran', 'military service', 'armed forces', 'served in the military'], P['had any Canadian military service?'], true)
+  add(['indigenous person', 'indigenous', 'first nations', 'aboriginal'], P['an Indigenous/Aboriginal person who is First Nations, Inuit or Métis?'], true)
+  add(['disability', 'person with a disability', 'non visible disability', 'visible or non visible disability'], P['a person with a disability'], true)
+  add(['visible minority', 'member of a visible minority'], P['visible minority group'], true)
   const skip = new Set(['name', 'first name', 'last name', 'email', 'phone', 'location', 'linkedin', 'github', 'needs_sponsorship'])
   for (const [k, v] of Object.entries(P)) {
     if (skip.has(k)) continue
@@ -774,6 +820,12 @@ async function fillForm(profile) {
   }
 
   let filled = 0
+  const record = (label, best) =>
+    filledFields.push({
+      label: String(label || '').replace(/\s+/g, ' ').trim().slice(0, 60),
+      value: best.value,
+      important: best.important,
+    })
 
   // 1) Native inputs / textareas / <select>
   const natives = [...document.querySelectorAll('input, select, textarea')].filter((el) => {
@@ -795,12 +847,14 @@ async function fillForm(profile) {
       el.dispatchEvent(new Event('change', { bubbles: true }))
       filled++
       highlight(el)
+      record(labelText(el), best)
     } else {
       nativeSet(el, String(best.value))
       el.dispatchEvent(new Event('input', { bubbles: true }))
       el.dispatchEvent(new Event('change', { bubbles: true }))
       filled++
       highlight(el)
+      record(labelText(el), best)
     }
   }
 
@@ -854,6 +908,7 @@ async function fillForm(profile) {
         r.dispatchEvent(new Event('change', { bubbles: true }))
         filled++
         highlight(r.closest('label') || r)
+        record(groupLabel(group[0]), best)
         break
       }
     }
@@ -885,6 +940,17 @@ async function fillForm(profile) {
       filled++
       highlight(trigger)
       await sleep(120)
+      // Keyboard repair: the widget can show selected while validation fails.
+      const after = norm(trigger.innerText || trigger.value)
+      if (!after || /select|choose|no selection/.test(after)) {
+        try {
+          trigger.focus()
+          trigger.dispatchEvent(new KeyboardEvent('keydown', { key: 'ArrowDown', bubbles: true }))
+          trigger.dispatchEvent(new KeyboardEvent('keydown', { key: 'Enter', bubbles: true }))
+          trigger.dispatchEvent(new KeyboardEvent('keydown', { key: 'Tab', bubbles: true }))
+        } catch (e) {}
+      }
+      record(labelText(trigger), best)
     } else {
       // Close the menu to avoid leaving it open over the next field.
       document.body.dispatchEvent(new KeyboardEvent('keydown', { key: 'Escape', bubbles: true }))
@@ -906,7 +972,8 @@ async function fillForm(profile) {
     el.dispatchEvent(new Event('change', { bubbles: true }))
     filled++
     highlight(el)
+    record(labelText(el), best)
   }
 
-  return { filled }
+  return { filled, fields: filledFields }
 }

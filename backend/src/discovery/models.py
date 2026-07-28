@@ -100,6 +100,7 @@ class JobListResponse(BaseModel):
 
 class StatusUpdate(BaseModel):
     status: str
+    evidence: str | None = None  # confirmation text/URL when marking 'applied'
 
 
 class StatsResponse(BaseModel):

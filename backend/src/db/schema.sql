@@ -69,3 +69,17 @@ CREATE TABLE IF NOT EXISTS answers (
     created_at TEXT DEFAULT (datetime('now')),
     updated_at TEXT
 );
+
+-- Blocker queue (ApplyPilot-style): things that stopped an application and need
+-- attention — captcha / login / 2fa / missing_file / dropdown / upload / other.
+CREATE TABLE IF NOT EXISTS blockers (
+    id INTEGER PRIMARY KEY AUTOINCREMENT,
+    job_id INTEGER,
+    kind TEXT NOT NULL,
+    detail TEXT,
+    needs_user INTEGER DEFAULT 1,
+    resolved INTEGER DEFAULT 0,
+    created_at TEXT DEFAULT (datetime('now')),
+    resolved_at TEXT
+);
+CREATE INDEX IF NOT EXISTS idx_blocker_job ON blockers(job_id);

@@ -65,6 +65,10 @@ class Database:
                 "ALTER TABLE oa_answers ADD COLUMN image_base64 TEXT",
                 "ALTER TABLE oa_answers ADD COLUMN mime_type TEXT",
                 "ALTER TABLE oa_answers ADD COLUMN messages TEXT",
+                # Confirmation evidence for a real submission (ApplyPilot: only
+                # count 'applied' when there's confirmation, not a blind flip).
+                "ALTER TABLE jobs ADD COLUMN applied_at TEXT",
+                "ALTER TABLE jobs ADD COLUMN applied_evidence TEXT",
             ):
                 try:
                     conn.execute(stmt)
@@ -487,7 +491,9 @@ class Database:
         with self.connect() as conn:
             conn.execute("DELETE FROM answers WHERE key = ?", (key,))
 
-    def update_job_status(self, job_id: int, new_status: str) -> bool:
+    def update_job_status(
+        self, job_id: int, new_status: str, evidence: str | None = None
+    ) -> bool:
         job = self.get_job(job_id)
         if not job:
             return False
@@ -501,7 +507,50 @@ class Database:
                 "UPDATE jobs SET status = ?, updated_at = ? WHERE id = ?",
                 (new_status, now, job_id),
             )
+            # Record confirmation evidence when the job is marked applied.
+            if new_status == "applied":
+                conn.execute(
+                    "UPDATE jobs SET applied_at = ?, applied_evidence = ? WHERE id = ?",
+                    (now, (evidence or "").strip() or None, job_id),
+                )
         return True
+
+    # --- Blocker queue ---
+    def add_blocker(
+        self, job_id: int | None, kind: str, detail: str = "", needs_user: bool = True
+    ) -> int:
+        with self.connect() as conn:
+            cur = conn.execute(
+                "INSERT INTO blockers (job_id, kind, detail, needs_user) VALUES (?, ?, ?, ?)",
+                (job_id, kind, detail, 1 if needs_user else 0),
+            )
+            return cur.lastrowid
+
+    def list_blockers(
+        self, job_id: int | None = None, resolved: bool | None = None
+    ) -> list[dict[str, Any]]:
+        clauses, params = [], []
+        if job_id is not None:
+            clauses.append("job_id = ?")
+            params.append(job_id)
+        if resolved is not None:
+            clauses.append("resolved = ?")
+            params.append(1 if resolved else 0)
+        where = f"WHERE {' AND '.join(clauses)}" if clauses else ""
+        with self.connect() as conn:
+            rows = conn.execute(
+                f"SELECT * FROM blockers {where} ORDER BY id DESC", params
+            ).fetchall()
+            return [dict(r) for r in rows]
+
+    def resolve_blocker(self, blocker_id: int) -> bool:
+        now = datetime.utcnow().isoformat()
+        with self.connect() as conn:
+            cur = conn.execute(
+                "UPDATE blockers SET resolved = 1, resolved_at = ? WHERE id = ?",
+                (now, blocker_id),
+            )
+            return cur.rowcount > 0
 
     def get_stats(self) -> dict[str, Any]:
         today = datetime.utcnow().date().isoformat()
