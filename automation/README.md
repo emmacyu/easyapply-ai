@@ -1,12 +1,12 @@
 # Semi-auto applier (Playwright, host-side)
 
 L2 **semi-automatic** Greenhouse applier. It opens a real browser, fills the
-form from your JobPilot profile, AI-answers blank questions, attaches your
+form from your EasyApply profile, AI-answers blank questions, attaches your
 tailored PDFs — then **pauses for you to review and Submit yourself**.
 It **never** clicks Submit.
 
 Runs on your Mac (needs a visible browser); talks to the Dockerized backend on
-`localhost:8000`.
+`localhost:8010`.
 
 ## Why it's separate from Docker
 
@@ -25,7 +25,7 @@ playwright install chromium
 
 ## Run
 
-Make sure JobPilot is up (`docker compose up -d`) and the job has generated
+Make sure EasyApply is up (`docker compose up -d`) and the job has generated
 materials (so the tailored PDFs exist).
 
 ```bash

@@ -23,7 +23,7 @@ from src.discovery.models import (
     StatusUpdate,
 )
 from src.pipeline import Pipeline, job_to_response
-from src.render.latex import USER_TEMPLATES_DIR, compile_latex
+from src.render.latex import compile_latex, own_pdf, source_tex
 from src.web.deps import BACKEND_ROOT, db, media_for
 
 logger = logging.getLogger(__name__)
@@ -126,9 +126,12 @@ _BASE_SOURCES = {"resume": "resume.tex", "cover": "coverletter.tex"}
 
 
 def _base_pdf(kind: str) -> Path | None:
-    """Compile the pristine template to PDF once and cache it (recompile if the
-    source .tex is newer)."""
-    src = USER_TEMPLATES_DIR / _BASE_SOURCES[kind]
+    """The un-tailored document as a PDF: the user's own PDF if they provided
+    one, else the source .tex compiled once and cached (recompiled if newer)."""
+    own = own_pdf(kind)
+    if own:
+        return own
+    src = source_tex(kind)
     out = _BASE_DIR / f"{kind}.pdf"
     if out.exists() and src.exists() and out.stat().st_mtime >= src.stat().st_mtime:
         return out
@@ -272,7 +275,8 @@ def template_pdf(kind: str, inline: bool = False) -> FileResponse:
     return FileResponse(
         pdf,
         media_type="application/pdf",
-        filename=f"{kind}_original.pdf",
+        # The user's own PDF keeps its name; it is what gets uploaded to employers.
+        filename=pdf.name if pdf == own_pdf(kind) else f"{kind}_original.pdf",
         content_disposition_type="inline" if inline else "attachment",
     )
 
@@ -293,7 +297,7 @@ def job_diff(job_id: int, kind: str) -> dict[str, Any]:
     tailored_tex = Path(job[path_key]).parent / tex_name
     if not tailored_tex.exists():
         raise HTTPException(status_code=404, detail="Tailored source not found")
-    original_tex = USER_TEMPLATES_DIR / _BASE_SOURCES[kind]
+    original_tex = source_tex(kind)
 
     segments = diff_segments(
         original_tex.read_text(encoding="utf-8"),

@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""JobPilot CLI — personal job search automation pipeline."""
+"""EasyApply CLI — personal job search automation pipeline."""
 
 from __future__ import annotations
 
@@ -96,7 +96,7 @@ def cmd_gmail_auth(args: argparse.Namespace) -> None:
 
 
 def main() -> None:
-    parser = argparse.ArgumentParser(description="JobPilot — job search automation")
+    parser = argparse.ArgumentParser(description="EasyApply — job search automation")
     parser.add_argument("-v", "--verbose", action="store_true")
     parser.add_argument("--mock", action="store_true", help="Use mock LLM provider")
     sub = parser.add_subparsers(dest="command", required=True)
@@ -109,7 +109,7 @@ def main() -> None:
 
     serve_p = sub.add_parser("serve", help="Start FastAPI server")
     serve_p.add_argument("--host", default="0.0.0.0")
-    serve_p.add_argument("--port", type=int, default=8000)
+    serve_p.add_argument("--port", type=int, default=8010)
     serve_p.add_argument("--reload", action="store_true")
     serve_p.add_argument(
         "--schedule",

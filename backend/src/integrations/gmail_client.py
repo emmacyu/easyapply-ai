@@ -31,6 +31,27 @@ ALLOWED_ACCOUNT = os.getenv("GMAIL_ACCOUNT", "emmayu.cs@gmail.com").strip().lowe
 
 _CODE_RE = re.compile(r"(?<![0-9A-Za-z])([0-9]{4,8}|[0-9A-Z]{5,8})(?![0-9A-Za-z])")
 _LINK_RE = re.compile(r"https?://[^\s\"'<>)]+", re.IGNORECASE)
+# A code announced as such ("verification code is 123456", "code: 9F3K2A") beats
+# any other number in the e-mail (years, street numbers, phone fragments).
+_LABELLED_CODE_RE = re.compile(
+    r"(?:code|passcode|password|otp|pin)\b[^0-9A-Za-z]{0,3}(?:is|:|=)?[^0-9A-Za-z]{0,40}?"
+    r"(?<![0-9A-Za-z])([0-9]{4,8}|(?=[0-9A-Z]*[0-9])[0-9A-Z]{5,8})(?![0-9A-Za-z])",
+    re.IGNORECASE,
+)
+
+
+def _find_code(subject: str, body: str, digits: int | None = None) -> str | None:
+    """The verification code in an e-mail; `digits` is the length the form expects."""
+    text = f"{subject}\n{body}"
+    if digits:
+        exact = re.compile(rf"(?<![0-9A-Za-z])([0-9]{{{digits}}})(?![0-9A-Za-z])")
+        labelled = [m.group(1) for m in _LABELLED_CODE_RE.finditer(text) if len(m.group(1)) == digits]
+        if labelled:
+            return labelled[0]
+        m = exact.search(text)
+        return m.group(1) if m else None
+    m = _LABELLED_CODE_RE.search(text) or _CODE_RE.search(subject) or _CODE_RE.search(body)
+    return m.group(1) if m else None
 
 
 # --------------------------------------------------------------------------- #
@@ -120,8 +141,11 @@ def _extract_text(payload: dict[str, Any]) -> str:
     return "\n".join(t for t in text if t)
 
 
-def find_verification(sender: str | None = None, minutes: int = 10) -> dict[str, Any]:
-    """Return the most recent verification code/link from the allowed mailbox."""
+def find_verification(
+    sender: str | None = None, minutes: int = 10, digits: int | None = None
+) -> dict[str, Any]:
+    """Return the most recent verification code/link from the allowed mailbox.
+    With `digits`, only an e-mail carrying a code of that length counts."""
     creds = _load_credentials()
     if not creds:
         raise RuntimeError("Gmail not connected. Run `python main.py gmail-auth` first.")
@@ -146,13 +170,15 @@ def find_verification(sender: str | None = None, minutes: int = 10) -> dict[str,
             continue
         subject = _header(msg, "Subject")
         body = _extract_text(msg.get("payload", {}))
-        code_match = _CODE_RE.search(subject) or _CODE_RE.search(body)
+        code = _find_code(subject, body, digits)
+        if digits and not code:
+            continue  # some other recent e-mail; keep looking for the one with the code
         link_match = _LINK_RE.search(body)
         return {
             "found": True,
             "from": _header(msg, "From"),
             "subject": subject,
-            "code": code_match.group(1) if code_match else None,
+            "code": code,
             "link": link_match.group(0) if link_match else None,
             "received": received.isoformat(),
         }

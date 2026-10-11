@@ -83,3 +83,20 @@ CREATE TABLE IF NOT EXISTS blockers (
     resolved_at TEXT
 );
 CREATE INDEX IF NOT EXISTS idx_blocker_job ON blockers(job_id);
+
+-- Applications the user actually submitted, recorded by the browser extension
+-- when a submission is confirmed. Independent of `jobs`: most applications are
+-- for postings that were never saved to the board (job_id is then NULL).
+CREATE TABLE IF NOT EXISTS applications (
+    id INTEGER PRIMARY KEY AUTOINCREMENT,
+    url TEXT NOT NULL UNIQUE,        -- application page; re-submitting updates the row
+    company TEXT,
+    title TEXT,
+    page_title TEXT,
+    job_id INTEGER,                  -- jobs.id when a tailored résumé was used
+    resume TEXT,                     -- file name that was uploaded
+    answers TEXT,                    -- JSON [{label, value, source}] as submitted
+    confirmation TEXT,               -- how we know: 'page' (confirmation seen) | 'manual'
+    applied_at TEXT DEFAULT (datetime('now'))
+);
+CREATE INDEX IF NOT EXISTS idx_applications_company ON applications(company);

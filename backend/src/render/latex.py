@@ -10,6 +10,27 @@ logger = logging.getLogger(__name__)
 PROJECT_ROOT = Path(__file__).resolve().parents[2]
 # User-provided Overleaf templates + fonts live under config/templates.
 USER_TEMPLATES_DIR = PROJECT_ROOT / "config" / "templates"
+# The user's own documents live under data/ (kept out of git and the image):
+# data/resume/resume.tex (+ optionally their own PDF build), data/coverletter/
+# coverletter.tex. When present they replace the config/templates copies, which
+# stay as the fallback and still provide the shared .cls files and fonts.
+USER_DOCS_DIR = PROJECT_ROOT / "data"
+_USER_DOCS = {"resume": ("resume", "resume.tex"), "cover": ("coverletter", "coverletter.tex")}
+
+
+def source_tex(kind: str) -> Path:
+    """The .tex that is the source of truth for ``kind`` ("resume" | "cover")."""
+    subdir, name = _USER_DOCS[kind]
+    own = USER_DOCS_DIR / subdir / name
+    return own if own.exists() else USER_TEMPLATES_DIR / name
+
+
+def own_pdf(kind: str) -> Path | None:
+    """A PDF the user placed beside their .tex — their own build of the base
+    document, used as-is (and under its own filename) instead of recompiling."""
+    subdir, _ = _USER_DOCS[kind]
+    pdfs = sorted((USER_DOCS_DIR / subdir).glob("*.pdf"))
+    return pdfs[0] if pdfs else None
 
 
 def tectonic_available() -> bool:
@@ -18,11 +39,14 @@ def tectonic_available() -> bool:
 
 def _stage_assets(build_dir: Path) -> None:
     """Copy the class files and fonts the templates depend on into build_dir."""
-    for cls_file in USER_TEMPLATES_DIR.glob("*.cls"):
-        shutil.copy(cls_file, build_dir / cls_file.name)
-    fonts_src = USER_TEMPLATES_DIR / "fonts"
-    if fonts_src.is_dir():
-        shutil.copytree(fonts_src, build_dir / "fonts", dirs_exist_ok=True)
+    # Later dirs win, so a .cls / font shipped with the user's own document
+    # overrides the bundled one.
+    for src_dir in [USER_TEMPLATES_DIR, *(USER_DOCS_DIR / sub for sub, _ in _USER_DOCS.values())]:
+        for cls_file in src_dir.glob("*.cls"):
+            shutil.copy(cls_file, build_dir / cls_file.name)
+        fonts_src = src_dir / "fonts"
+        if fonts_src.is_dir():
+            shutil.copytree(fonts_src, build_dir / "fonts", dirs_exist_ok=True)
 
 
 def compile_latex(

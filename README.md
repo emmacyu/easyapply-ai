@@ -1,4 +1,4 @@
-# JobPilot — 个人求职全流程自动化（自用）
+# EasyApply — 个人求职全流程自动化（自用）
 
 > 一个跑在本地的个人求职自动化系统。从最初的「发现→评分→定制材料」求职管道，已成长为覆盖**求职全流程**的自用工具箱：
 > **自动发现职位 → AI 打分筛选 → 定制简历/求职信 → 浏览器扩展一键填表投递 → Gmail 验证码读取**。
@@ -90,7 +90,7 @@
 easyapply-ai/
 ├── .env                        # LLM_PROVIDER / key / LLM_MODEL / LLM_FALLBACK_MODELS / GMAIL_ACCOUNT（gitignore）
 ├── Dockerfile                  # 多阶段：Node 构建前端 → Python + tectonic 运行
-├── docker-compose.yml          # 单容器；挂载命名卷 jobpilot-data + bind-mount profile.yaml/bq.yaml/secrets
+├── docker-compose.yml          # 单容器；挂载命名卷 easyapply-data + bind-mount profile.yaml/bq.yaml/secrets
 ├── backend/                    # Python 后端
 │   ├── main.py                 # CLI 入口：run / discover / score / tailor / serve / gmail-auth
 │   ├── requirements.txt
@@ -143,8 +143,10 @@ easyapply-ai/
 │       └── api/client.ts       # 前后端契约封装
 ├── extension/                  # Chrome 扩展（MV3）
 │   ├── manifest.json
-│   ├── popup.html / popup.js   # 6 个动作按钮（见 §8.5）
-│   ├── background.js           # service worker：转发音频/截图到后端
+│   ├── content.js              # 每个 frame 注入：识别申请页 + 页面内面板（见 §8.5）
+│   ├── page_fns.js             # 注入页面执行的填表/作答/附简历函数
+│   ├── background.js           # service worker：编排填表流程、代页面访问后端
+│   ├── popup.html / popup.js   # 存职位 / 手动打开面板 / OA / FinalRoundAI / Scan
 │   └── README.md
 ├── automation/                 # 宿主机 Playwright 半自动投递器
 │   ├── apply.py                # Greenhouse-first；复用扩展填表逻辑；暂停等人工 Submit
@@ -226,6 +228,8 @@ grades: { A: 85, B: 70, C: 55, D: 40 }
 
 ## 7. 简历 / 求职信定制（整篇 `.tex` 保守改写）
 
+> **你的简历放 `backend/data/resume/`**（`resume.tex` + 可选的自编译 PDF；求职信放 `backend/data/coverletter/`），存在时优先于 `config/templates/` 里的同名文件，详见 `backend/config/templates/README.md`。
+>
 > 早期方案是「LLM 输出 JSON → Jinja2 填模板」；因 Overleaf 简历排版精细、含自定义板块，改用**整篇 `.tex` 保守改写**，保真度更高、改动更小。真源是 `resume.tex` 本身。
 
 **简历**（`prompts/tailor_resume_tex.md`）硬性约束：
@@ -251,7 +255,7 @@ python main.py run              # 完整管道：发现→去重→评分→为 
 python main.py discover         # 只抓取入库
 python main.py score            # 只给 status=discovered 的评分
 python main.py tailor --id 42   # 为指定职位重新生成材料
-python main.py serve            # 启动后端 API http://localhost:8000
+python main.py serve            # 启动后端 API http://localhost:8010
 python main.py serve --schedule # 附带每日定时抓取（读 search.yaml 的 schedule_cron）
 python main.py gmail-auth       # 一次性授权只读 Gmail（见 §8.6）
 python main.py run --mock       # 用 mock LLM，免 key 跑通流程
@@ -266,15 +270,15 @@ cd ../frontend && npm run dev   # 前端开发服务器 http://localhost:5173
 # 1) 配置 .env（首次）：项目根目录 .env 填入对应 provider 的 key（可从 backend/.env.example 复制）
 # 2) 构建并启动
 docker compose up -d --build
-# 3) 打开 http://localhost:8000
+# 3) 打开 http://localhost:8010
 docker compose logs -f          # 日志
 docker compose down             # 停止
 ```
 
 - LLM provider/key 放**项目根目录 `.env`**（`main.py` 读 `PROJECT_ROOT.parent/.env`）。
-- SQLite 与生成材料存命名卷 `jobpilot-data`（挂载 `/app/backend/data`），重启不丢。
+- SQLite 与生成材料存命名卷 `easyapply-data`（挂载 `/app/backend/data`），重启不丢。
 - `profile.yaml`、`bq.yaml`、`secrets/` 为 **bind-mount**：在宿主机改动即时生效、无需重建镜像。
-- 端口：`8000` 主服务；`8765` 仅一次性 Gmail OAuth loopback 用。
+- 端口：`8010` 主服务；`8765` 仅一次性 Gmail OAuth loopback 用。
 
 ### 8.3 LLM provider 与免费额度回退
 
@@ -297,21 +301,29 @@ Gemini 免费层按模型按天限额（flash 系列约 20 次/天）。主模�
 
 ### 8.5 浏览器扩展：填表 + 副驾入口（`extension/`）
 
-多数公司投递在**外部招聘网站**（Scotiabank / Workday 等），因跨域限制，只有扩展能"伸进任意申请页"。popup 有 6 个动作：
+多数公司投递在**外部招聘网站**（Scotiabank / Workday 等），因跨域限制，只有扩展能"伸进任意申请页"。
+
+**页面内面板（`content.js`）**：打开申请页时自动识别表单（含 iframe 内嵌的 ATS 表单），在页面左上角弹出面板，无需点扩展图标；识别不到时可从 popup 的「Open autofill panel on this page」手动打开。面板动作：
 
 | 按钮 | 作用 |
 |---|---|
-| ★ Save this job to JobPilot | 把当前职位 URL 抓取入库（`POST /api/jobs/save`），进看板评分/定制 |
-| **⚡ Apply — fill everything** | **一键完成整张单页申请：填字段 + AI 答空白题 + 附上定制简历 PDF，然后停下等你复核并手动点 Submit**。上方下拉选哪份简历（按当前页公司自动匹配 `materials_ready` 职位）。最适合 Greenhouse/Lever 这类**单页** ATS;Workday 多步只填当前步（见下） |
-| Fill this page | 从 `GET /api/profile` 按「标签 ↔ 答案」模糊匹配填字段；命中加绿框；只填有的、不覆盖已填（Apply 的分步版）|
-| AI-answer blank questions | 对页面空白问题调 `POST /api/answer`（bq → 缓存 → LLM）作答后回填（Apply 的分步版）|
+| **⚡ Apply — fill everything** | **一键完成整张单页申请：填字段 + AI 答空白题 + 附上定制简历 PDF，然后停下等你复核并手动点 Submit**。上方下拉选哪份简历（按当前页公司自动匹配 `materials_ready` 职位）。最适合 Greenhouse/Lever 这类**单页** ATS;Workday 多步表单每次只填当前步（后续步见下方勾选项） |
+| Fill fields | 从 `GET /api/profile` 按「标签 ↔ 答案」模糊匹配填字段；命中加绿框；只填有的、不覆盖已填（Apply 的分步版）|
+| AI answers | 对页面空白问题调 `POST /api/answer`（bq → 缓存 → LLM）作答后回填（Apply 的分步版）|
+| Auto-fill the next steps after Apply（勾选项，默认开）| 点过一次 Apply 后，多步表单（Workday）每出现新的一步就自动再填一次；翻页/提交仍由你手动点 |
+
+popup（扩展图标）保留的动作：
+
+| 按钮 | 作用 |
+|---|---|
+| ★ Save this job to EasyApply | 把当前职位 URL 抓取入库（`POST /api/jobs/save`），进看板评分/定制 |
 | 🖥️ OA screening → iPad | 截当前屏 → `POST /api/oa/answer`（Gemini 读题作答）→ 结果推到 `/oa` 查看页（可在 iPad 上开）|
 | 🎤 FinalRoundAI | 注入可拖动悬浮窗，`getDisplayMedia` 抓会议 tab 音频 → `POST /api/finalround/audio` → 显示 Q+作答 |
 | Scan page (debug) | 把检测到的字段清单打到页面 DevTools 控制台 |
 
 - **支持控件**：标准 `<input>/<textarea>/原生 <select>`、**Workday** 式自定义下拉、原生单选组。多选/日期/typeahead 暂不支持。
 - **安装**：`chrome://extensions` → 开发者模式 → 加载已解压 → 选 `extension/`。
-- ⚠️ 扩展**不上传简历文件**：PDF 由 JobPilot 生成、你下载后**手动上传**。提交前务必人工复核（尤其工作资格与自愿申报项）。
+- ⚠️ 扩展**不上传简历文件**：PDF 由 EasyApply 生成、你下载后**手动上传**。提交前务必人工复核（尤其工作资格与自愿申报项）。
 
 ### 8.6 Gmail 只读验证码（`integrations/gmail_client.py`）🔴 待配置
 
@@ -319,7 +331,7 @@ Gemini 免费层按模型按天限额（flash 系列约 20 次/天）。主模�
 
 一次性配置（你的动作）：
 1. Google Cloud：建项目 → 启用 Gmail API → OAuth 同意屏（External，把 `emmayu.cs@gmail.com` 加为 Test user）→ 建 **Desktop app** OAuth client → 下载 JSON → 存为 `backend/config/secrets/gmail_credentials.json`。
-2. `docker compose exec jobpilot python main.py gmail-auth` → 打开打印的 URL → 以 emmayu.cs 登录并授权。
+2. `docker compose exec easyapply python main.py gmail-auth` → 打开打印的 URL → 以 emmayu.cs 登录并授权。
 3. 注意：Testing 模式 refresh token 约 7 天过期（重跑授权，或把 app 发布到 Production）。
 
 接口：`GET /api/gmail/status`、`GET /api/gmail/verification?sender=&minutes=`。
@@ -330,7 +342,7 @@ Gemini 免费层按模型按天限额（flash 系列约 20 次/天）。主模�
 **Presentation（GitHub 仓库 → 幻灯片 → `.pptx`/Google Slides）** 拆为 **`jobpilot-presentation`**。
 各自用法见对应仓库的 README。
 
-> ⚠️ 遗留项：`extension/` 里的 **🖥️ OA screening** 与 **🎤 FinalRoundAI** 两个按钮仍指向本地 `:8000` 的 `/api/oa/*`、`/api/finalround/audio`——这些端点已随功能移到 `jobpilot-copilot`。要继续用这两个按钮，需把扩展指向 copilot 服务（默认 `:8020`），或把它们移到 copilot 侧。填表/投递相关按钮不受影响。
+> ⚠️ 遗留项：`extension/` 里的 **🖥️ OA screening** 与 **🎤 FinalRoundAI** 两个按钮仍指向本地 `:8010` 的 `/api/oa/*`、`/api/finalround/audio`——这些端点已随功能移到 `jobpilot-copilot`。要继续用这两个按钮，需把扩展指向 copilot 服务（默认 `:8020`），或把它们移到 copilot 侧。填表/投递相关按钮不受影响。
 
 ### 8.10 Playwright 半自动投递器（`automation/apply.py`）🔴 未在真实页面验证
 

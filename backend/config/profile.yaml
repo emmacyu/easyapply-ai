@@ -3,23 +3,35 @@ personal:
   last name: "Yu"
   Preferred First Name: "Emma"
   Preferred Last Name: "Yu"
+  "What's the name you'd prefer us to use": "Emma"
   Preferred Pronouns: "She/Her"
   Middle Name: "None"
   email: "emmayu.cs@gmail.com"
   phone: "+1 (437) 973-4933"
   phone type: "Mobile"
-  city: "Toronto"
-  location: "Toronto, ON, Canada"
-  Postal Code: "M2M1B9"
+  city: "North York"
+  province: "Ontario"
+  metro area: "Toronto"
+  Address: "50 Charlton Blvd"
+  location: "North York, ON, Canada"
+  Postal Code: "M2M 1B9"
   linkedin: "https://linkedin.com/in/emmacyu"
   github: "https://github.com/emmacyu"
-  portfolio link: "https://github.com/emmacyu"
+  portfolio website: "https://emmacyu.github.io/"
+  Paper Link: "https://dl.acm.org/doi/10.1145/3793251"
   gender: "Female"
   sexual orientation: "Heterosexual"
   visible minority group: "East Asian (Chinese)"
   an Indigenous/Aboriginal person who is First Nations, Inuit or Métis?: "No"
   a person with a disability: "No"
   had any Canadian military service?: "No"
+  Veteran Status: "I am not a protected veteran"
+  Are you Hispanic/Latino: "No"
+  Do you identify as a person with a disability: "No"
+  # Spelled several ways across sites (including the "LGTBQIA+" typo)
+  member of the LGTBQIA+ community: "No"
+  member of the LGBTQIA+ community: "No"
+  member of the LGBTQ+ community: "No"
   work_authorization: "Open Work Permit"
   needs_sponsorship: false
   Preferred Language: "English"
@@ -27,22 +39,43 @@ personal:
   : "No"
   ? Have you signed a non-compete or non-solicit agreement with your current employer that would preclude you from carrying out the expectations of this position?
   : "No"
-  how did you hear about this job?: "Company Website"
+  how did you hear about this job?: "LinkedIn"
+  How did you hear about: "LinkedIn"
+  Source: "LinkedIn"
+  Preferred Contact Method: "Email"
+  Are you excited to work in-office: "Yes"
   Do you currently hold or have you held, within the last 5 years, a position as a government official?: "No"
   Have you been referred or recommended for this position by a government official?: "No"
   Are you related to or have a close personal relationship with a government official?: "No"
   notice period: "Immediate"
+  are you able to speak, read, and write English fluently: "Yes"
+  How many years of relevant, professional experience do you have: "6 years"
   would you like to be considered for other roles?: "Yes"
   would you like to relocate?: "Yes"
   are you able to work in the following locations?: "Canada"
   what is your salary expectation?: "110000-150000"
   Do you require visa sponsorship?: "No"
   Are you legally authorized to work in Canada?: "Yes"
+  Are you legally authorized to work in the country: "Yes"
+  In which country are you applying to work: "Canada"
+  Are you willing to undergo a background check: "Yes"
   Are you willing to relocate?: "Yes"
   needs_sponsorship: false
   How did you find out about our company or this opportunity?: Linkedin
   If recruiter or referral, please list contact: NA
   Do you have a friend or relative that works for our group of companies?: "No"
+  Please indicate if you have previously worked for: "No"
+  # Prior employment with the hiring company (any wording, any company name): No
+  Have you been employed by: "No"
+  Have you ever been employed by: "No"
+  Have you previously been employed by: "No"
+  Have you ever worked for: "No"
+  Have you previously worked for: "No"
+  Are you a current or former employee: "No"
+  Are you subject to any restrictive covenants, covenants not to compete, confidentiality agreements or other contractual obligations: "No"
+  Are you a current contractor: "No"
+  I have read and consent to the terms and conditions: "Yes"
+  core collaboration hours: "I'm based in the Eastern Time zone (New York, Toronto, Boston, Montreal, etc.) and can be online during this window daily."
   Have you been convicted of a crime: "No"
   Will you be requiring accommodations: "No"
   May we send text messages that pertain to your job application?: "Yes"
@@ -166,6 +199,11 @@ skills:
 
 certifications: "AWS Certified Cloud Practitioner Certification"
 published paper link: https://dl.acm.org/doi/10.1145/3793251
+
+# Extra upload fields on application forms: "form label": "file name".
+# Files live in backend/data/supportive_documents/. The résumé is handled separately.
+documents:
+  Additional Documents: "ACM_journal_paper.pdf"
 
 preferences:
   target_titles:

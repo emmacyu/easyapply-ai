@@ -7,15 +7,12 @@ from typing import Any
 
 from src.ai.provider import LLMProvider, load_prompt
 from src.db.database import Database
-from src.render.latex import USER_TEMPLATES_DIR, compile_latex
+from src.render.latex import compile_latex, source_tex
 
 logger = logging.getLogger(__name__)
 
 PROJECT_ROOT = Path(__file__).resolve().parents[2]
 OUTPUT_DIR = PROJECT_ROOT / "data" / "output"
-
-RESUME_TEX = USER_TEMPLATES_DIR / "resume.tex"
-COVER_TEX = USER_TEMPLATES_DIR / "coverletter.tex"
 
 # A bare "&" is an alignment tab in LaTeX; neither template uses tables, so an
 # unescaped "&" in the model's prose (e.g. "R&D") is always a slip. Escape it.
@@ -68,7 +65,7 @@ class ResumeTailor:
 
     def __init__(self, provider: LLMProvider) -> None:
         self.provider = provider
-        self.base_tex = RESUME_TEX.read_text(encoding="utf-8")
+        self.base_tex = source_tex("resume").read_text(encoding="utf-8")
 
     def tailor(self, job: dict[str, Any]) -> tuple[str, bool]:
         """Return (latex, tailored). tailored=False means we fell back to the
@@ -96,8 +93,8 @@ class CoverLetterGenerator:
 
     def __init__(self, provider: LLMProvider) -> None:
         self.provider = provider
-        self.base_tex = COVER_TEX.read_text(encoding="utf-8")
-        self.background = RESUME_TEX.read_text(encoding="utf-8")
+        self.base_tex = source_tex("cover").read_text(encoding="utf-8")
+        self.background = source_tex("resume").read_text(encoding="utf-8")
 
     def generate(self, job: dict[str, Any]) -> tuple[str, bool]:
         """Return (latex, tailored). tailored=False means we fell back to the

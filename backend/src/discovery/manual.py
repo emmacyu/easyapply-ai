@@ -29,7 +29,7 @@ def _fetch(url: str) -> str:
         url,
         follow_redirects=True,
         timeout=20,
-        headers={"User-Agent": "Mozilla/5.0 (compatible; JobPilot/1.0)"},
+        headers={"User-Agent": "Mozilla/5.0 (compatible; EasyApply/1.0)"},
     )
     r.raise_for_status()
     return _strip_html(r.text)

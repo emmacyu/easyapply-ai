@@ -515,6 +515,41 @@ class Database:
                 )
         return True
 
+    # --- Submitted applications (recorded by the extension) ---
+    def record_application(self, app: dict[str, Any]) -> int:
+        now = datetime.utcnow().isoformat()
+        with self.connect() as conn:
+            conn.execute(
+                """
+                INSERT INTO applications
+                    (url, company, title, page_title, job_id, resume, answers, confirmation, applied_at)
+                VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)
+                ON CONFLICT(url) DO UPDATE SET
+                    company = excluded.company, title = excluded.title,
+                    page_title = excluded.page_title, job_id = excluded.job_id,
+                    resume = excluded.resume, answers = excluded.answers,
+                    confirmation = excluded.confirmation, applied_at = excluded.applied_at
+                """,
+                (
+                    app["url"], app.get("company"), app.get("title"), app.get("page_title"),
+                    app.get("job_id"), app.get("resume"), app.get("answers"),
+                    app.get("confirmation"), now,
+                ),
+            )
+            row = conn.execute("SELECT id FROM applications WHERE url = ?", (app["url"],)).fetchone()
+            return int(row["id"])
+
+    def delete_application(self, app_id: int) -> None:
+        with self.connect() as conn:
+            conn.execute("DELETE FROM applications WHERE id = ?", (app_id,))
+
+    def list_applications(self, limit: int = 200) -> list[dict[str, Any]]:
+        with self.connect() as conn:
+            rows = conn.execute(
+                "SELECT * FROM applications ORDER BY applied_at DESC LIMIT ?", (limit,)
+            ).fetchall()
+            return [dict(r) for r in rows]
+
     # --- Blocker queue ---
     def add_blocker(
         self, job_id: int | None, kind: str, detail: str = "", needs_user: bool = True

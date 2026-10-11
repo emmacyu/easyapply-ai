@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 """Semi-automatic Greenhouse application runner (host-side, Playwright).
 
-L2 "semi-auto": it opens a real browser, fills the form from your JobPilot
+L2 "semi-auto": it opens a real browser, fills the form from your EasyApply
 profile (reusing the same label->profile matching as the extension), answers
 blank questions via /api/answer, and attaches your tailored PDFs — then PAUSES
 so YOU review and click Submit. It NEVER submits for you.
@@ -143,9 +143,9 @@ def download(base: str, path: str, suffix: str) -> str | None:
 
 def main() -> None:
     ap = argparse.ArgumentParser(description="Semi-auto Greenhouse applier")
-    ap.add_argument("--job-id", type=int, help="JobPilot job id (for profile-tailored PDFs)")
+    ap.add_argument("--job-id", type=int, help="EasyApply job id (for profile-tailored PDFs)")
     ap.add_argument("--url", help="Apply page URL (defaults to the job's url)")
-    ap.add_argument("--backend", default="http://localhost:8000")
+    ap.add_argument("--backend", default="http://localhost:8010")
     ap.add_argument("--no-ai", action="store_true", help="Skip /api/answer for blank questions")
     args = ap.parse_args()
 

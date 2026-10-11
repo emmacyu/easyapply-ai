@@ -83,10 +83,18 @@ class JobSpySource:
         return all_jobs
 
     def persist(self, jobs: list[Job], db: Database) -> int:
+        from src import blacklist_store
+
         inserted = 0
+        skipped = 0
         for job in jobs:
+            if blacklist_store.match_company(job.company):
+                skipped += 1
+                continue
             job_id = db.insert_job(job.model_dump())
             if job_id:
                 inserted += 1
+        if skipped:
+            logger.info("Skipped %d jobs from blacklisted companies", skipped)
         logger.info("Inserted %d new jobs into database", inserted)
         return inserted

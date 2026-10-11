@@ -1,0 +1,4 @@
+# Industries you don't apply to, one per line (as LinkedIn names them).
+# When the extension sees a LinkedIn job from a company in one of these, it warns
+# you and adds the company to blacklist_companies.txt.
+IT Services and IT Consulting

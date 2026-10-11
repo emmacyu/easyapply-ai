@@ -1,7 +1,7 @@
 import { useState } from 'react'
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query'
 import { Link, Outlet, useMatch } from 'react-router-dom'
-import { Bookmark, Play, Search, User } from 'lucide-react'
+import { Bookmark, Play, Search, Send, User } from 'lucide-react'
 import { api } from '../api/client'
 import { StatsBar } from './StatsBar'
 import { JobCard } from './JobCard'
@@ -75,7 +75,7 @@ export function JobsLayout() {
       <header className="shrink-0 border-b border-border px-4 py-3 sm:px-6">
         <div className="flex flex-wrap items-center justify-between gap-3">
           <div>
-            <h1 className="text-xl font-bold tracking-tight">JobPilot</h1>
+            <h1 className="text-xl font-bold tracking-tight">EasyApply</h1>
             <p className="hidden text-xs text-muted-foreground sm:block">
               Discover → Score → Tailor → Apply (human-in-the-loop)
             </p>
@@ -89,6 +89,13 @@ export function JobsLayout() {
               <Play className="h-4 w-4" />
               Run Pipeline
             </button>
+            <Link
+              to="/applications"
+              className="inline-flex items-center gap-2 rounded-lg border border-border px-3 py-2 text-sm font-medium hover:bg-muted"
+            >
+              <Send className="h-4 w-4" />
+              Applications
+            </Link>
             <Link
               to="/profile"
               className="inline-flex items-center gap-2 rounded-lg border border-border px-3 py-2 text-sm font-medium hover:bg-muted"

@@ -1,26 +1,34 @@
 services:
-  jobpilot:
+  easyapply:
     build:
       context: .
       dockerfile: Dockerfile
-    image: jobpilot:latest
-    container_name: jobpilot
+    image: easyapply:latest
+    container_name: easyapply
     ports:
-      - "8000:8000"
+      - "8010:8010"
       - "8765:8765"   # one-time Gmail OAuth loopback (python main.py gmail-auth)
     # Pass LLM provider + API keys from the repo-root .env (copy from backend/.env.example)
     env_file:
       - .env
     volumes:
       # Persist the SQLite DB and generated resumes/cover letters across restarts
-      - jobpilot-data:/app/backend/data
+      - easyapply-data:/app/backend/data
+      # Your own résumé / cover letter (resume.tex + optional PDF); edits apply without rebuild
+      - ./backend/data/resume:/app/backend/data/resume
+      - ./backend/data/coverletter:/app/backend/data/coverletter
+      # Supporting documents (papers, transcripts…) for extra upload fields
+      - ./backend/data/supportive_documents:/app/backend/data/supportive_documents
       # Gmail OAuth client credentials + token (bind mount so they persist & are editable)
       - ./backend/config/secrets:/app/backend/config/secrets
       # Live profile.yaml so the Profile UI's saves land on disk & take effect without rebuild
       - ./backend/config/profile.yaml:/app/backend/config/profile.yaml
+      # Blacklists: the extension appends companies here, so they must persist on the host
+      - ./backend/config/blacklist_companies.txt:/app/backend/config/blacklist_companies.txt
+      - ./backend/config/blacklist_industries.txt:/app/backend/config/blacklist_industries.txt
       # Live bq.yaml (user's hand-written Q&A) — read-only lookup, edits take effect without rebuild
       - ./backend/config/bq.yaml:/app/backend/config/bq.yaml
     restart: unless-stopped
 
 volumes:
-  jobpilot-data:
+  easyapply-data:

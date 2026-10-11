@@ -1,4 +1,4 @@
-"""JobPilot API — app assembly only.
+"""EasyApply API — app assembly only.
 
 This repo is the job-search / apply pipeline. Its features live in routers under
 `src/web/routers/` (pipeline, core). The interview/assessment features were split
@@ -20,7 +20,7 @@ from src.web.routers import core, pipeline
 
 logger = logging.getLogger(__name__)
 
-app = FastAPI(title="JobPilot API", version="1.0.0")
+app = FastAPI(title="EasyApply API", version="1.0.0")
 
 app.add_middleware(
     CORSMiddleware,

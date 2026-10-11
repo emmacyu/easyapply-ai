@@ -45,6 +45,19 @@ export interface PipelineStatus {
   error?: string | null
 }
 
+export interface Application {
+  id: number
+  url: string
+  company: string | null
+  title: string | null
+  page_title: string | null
+  job_id: number | null
+  resume: string | null
+  answers: { label: string; value: string; source: string }[]
+  confirmation: 'page' | 'manual' | null
+  applied_at: string
+}
+
 async function request<T>(path: string, options?: RequestInit): Promise<T> {
   const res = await fetch(path, {
     headers: { 'Content-Type': 'application/json' },
@@ -110,6 +123,9 @@ export const api = {
     }),
   deleteAnswer: (key: string) =>
     request<{ status: string }>(`/api/answers/${key}`, { method: 'DELETE' }),
+  listApplications: () => request<Application[]>('/api/applications'),
+  deleteApplication: (id: number) =>
+    request<{ status: string }>(`/api/applications/${id}`, { method: 'DELETE' }),
   saveJob: (url: string) =>
     request<{ saved: boolean; duplicate: boolean; id: number | null; title: string; company: string }>(
       '/api/jobs/save',

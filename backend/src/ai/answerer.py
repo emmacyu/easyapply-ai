@@ -10,7 +10,9 @@ from __future__ import annotations
 import hashlib
 import json
 import logging
+import os
 import re
+from datetime import datetime
 from typing import Any
 
 import yaml
@@ -43,6 +45,31 @@ def _match_option(answer: str, options: list[str]) -> str | None:
     return None
 
 
+# Fields a real applicant is told to leave empty (bot traps). Never answered.
+_LEAVE_BLANK = re.compile(
+    r"leave (this |the )?(field |box |input |question )?(blank|empty)|do not (fill|enter|complete)|don.?t fill",
+    re.IGNORECASE,
+)
+_NO_ANSWER = "[[NO_ANSWER]]"
+
+
+def _cache_fresh(cached: dict[str, Any]) -> bool:
+    """Whether a cached LLM answer may still be reused.
+
+    ANSWER_CACHE_TTL (seconds; 0/unset = keep forever) bounds how long a generated
+    answer is reused, so profile/prompt changes show up while testing. Answers the
+    user reviewed or edited never expire — those are theirs, not the model's.
+    """
+    ttl = int(os.getenv("ANSWER_CACHE_TTL") or 0)
+    if ttl <= 0 or cached.get("reviewed"):
+        return True
+    try:
+        age = (datetime.utcnow() - datetime.fromisoformat(cached["updated_at"])).total_seconds()
+    except (KeyError, TypeError, ValueError):
+        return False
+    return age <= ttl
+
+
 def answer_question(
     db: Database,
     question: str,
@@ -51,6 +78,9 @@ def answer_question(
     job_id: int | None = None,
     use_mock: bool = False,
 ) -> dict[str, Any]:
+    if _LEAVE_BLANK.search(question):
+        return {"answer": "", "cached": False, "needs_review": False, "source": "skipped"}
+
     # 1) The user's hand-written answers (bq.yaml) win over everything.
     from src.bq_store import lookup as bq_lookup
 
@@ -66,7 +96,7 @@ def answer_question(
     # 2) Previously generated/edited answers.
     key = _cache_key(question, options, job_id)
     cached = db.get_answer(key)
-    if cached and cached.get("answer") is not None:
+    if cached and cached.get("answer") is not None and _cache_fresh(cached):
         return {
             "answer": cached["answer"],
             "cached": True,
@@ -107,6 +137,11 @@ def answer_question(
     except Exception as exc:  # noqa: BLE001
         logger.warning("answer_question LLM failed: %s", exc)
         return {"answer": "", "cached": False, "needs_review": True, "error": str(exc)[:200]}
+
+    # The model declined (or returned nothing): leave the field empty, and don't
+    # cache it — the profile may answer it later.
+    if not raw or _NO_ANSWER in raw or "NO_ANSWER" in raw.upper():
+        return {"answer": "", "cached": False, "needs_review": True}
 
     answer = raw
     if options:

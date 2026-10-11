@@ -1,13 +1,21 @@
 {
   "manifest_version": 3,
-  "name": "JobPilot Autofill",
-  "version": "0.1.0",
-  "description": "Autofill job application forms from your JobPilot profile (profile.yaml).",
+  "name": "EasyApply Autofill",
+  "version": "0.2.0",
+  "description": "Autofill job application forms from your EasyApply profile (profile.yaml).",
   "permissions": ["activeTab", "scripting", "storage"],
-  "host_permissions": ["http://localhost:8000/*", "<all_urls>"],
+  "host_permissions": ["http://localhost:8010/*", "<all_urls>"],
   "background": { "service_worker": "background.js" },
+  "content_scripts": [
+    {
+      "matches": ["<all_urls>"],
+      "js": ["content.js"],
+      "all_frames": true,
+      "run_at": "document_idle"
+    }
+  ],
   "action": {
     "default_popup": "popup.html",
-    "default_title": "JobPilot Autofill"
+    "default_title": "EasyApply Autofill"
   }
 }

@@ -6,6 +6,7 @@ import { JobsLayout } from './components/JobsLayout'
 import { JobDetail } from './pages/JobDetail'
 import { EmptyDetail } from './pages/EmptyDetail'
 import { Profile } from './pages/Profile'
+import { Applications } from './pages/Applications'
 import './index.css'
 
 const queryClient = new QueryClient({
@@ -20,6 +21,7 @@ ReactDOM.createRoot(document.getElementById('root')!).render(
       <BrowserRouter>
         <Routes>
           <Route path="/profile" element={<Profile />} />
+          <Route path="/applications" element={<Applications />} />
           <Route element={<JobsLayout />}>
             <Route index element={<EmptyDetail />} />
             <Route path="jobs/:id" element={<JobDetail />} />
